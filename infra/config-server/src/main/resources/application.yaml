@@ -1,0 +1,35 @@
+server:
+  port: 8889
+
+spring:
+  application:
+    name: config-server
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:native}
+
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: ${CONFIG_NATIVE_REPO_URI:file:./clinic-config-repo,file:./infra/config-server/clinic-config-repo,classpath:/clinic-config-repo}
+        git:
+          uri: ${CONFIG_GIT_REPO_URI:https://github.com/hieult-dev/clinic-config-repo.git}
+          default-label: main
+          clone-on-start: false
+          force-pull: false
+          username: ${GIT_USERNAME:}
+          password: ${GIT_TOKEN:}
+
+encrypt:
+  key: ${ENCRYPT_KEY:clinic_default_encrypt_key_2026}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+  endpoint:
+    health:
+      show-details: always

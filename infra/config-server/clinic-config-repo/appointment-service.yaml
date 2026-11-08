@@ -1,0 +1,59 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: appointment-service
+
+  datasource:
+    url: ${APPOINTMENT_DB_URL:jdbc:postgresql://localhost:5432/appointment_db}
+    username: ${APPOINTMENT_DB_USERNAME:postgres}
+    password: ${APPOINTMENT_DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:postgres_password}}
+    driver-class-name: org.postgresql.Driver
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:admin}
+    password: ${SPRING_RABBITMQ_PASSWORD:admin}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+clients:
+  openfeign:
+    connect-timeout-millis: 5000
+    read-timeout-millis: 10000
+    logger-level: basic
+
+  doctor-service:
+    base-url: ${DOCTOR_SERVICE_URL:http://localhost:8082}
+
+  patient-service:
+    base-url: ${PATIENT_SERVICE_URL:http://localhost:8084}
+
+  notification-service:
+    base-url: ${NOTIFICATION_SERVICE_URL:http://localhost:8083}
+    appointment-events-path: /appointment-events
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh
+  endpoint:
+    health:
+      show-details: always

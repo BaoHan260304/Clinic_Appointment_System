@@ -1,0 +1,83 @@
+server:
+  port: ${SERVER_PORT:8083}
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:${NOTIFICATION_DB_URL:jdbc:postgresql://localhost:5432/notification_db}}
+    username: ${SPRING_DATASOURCE_USERNAME:${NOTIFICATION_DB_USERNAME:postgres}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${NOTIFICATION_DB_PASSWORD:postgres_password}}
+    driver-class-name: org.postgresql.Driver
+
+  mail:
+    host: ${SPRING_MAIL_HOST:${MAIL_HOST:smtp.gmail.com}}
+    port: ${SPRING_MAIL_PORT:${MAIL_PORT:587}}
+    username: ${SPRING_MAIL_USERNAME:${MAIL_USERNAME:clinic.noreply@example.com}}
+    password: ${SPRING_MAIL_PASSWORD:mock_password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:${RABBITMQ_HOST:localhost}}
+    port: ${SPRING_RABBITMQ_PORT:${RABBITMQ_PORT:5672}}
+    username: ${SPRING_RABBITMQ_USERNAME:${RABBITMQ_USERNAME:admin}}
+    password: ${SPRING_RABBITMQ_PASSWORD:admin}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          use_nationalized_character_data: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}}
+
+    consumer:
+      group-id: notification-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+    listener:
+      ack-mode: manual
+
+mail:
+  from: ${spring.mail.username:noreply@clinic.local}
+  from-name: ${MAIL_FROM_NAME:MSS Clinic}
+  provider: SMTP
+
+notification:
+  sender:
+    mock: ${NOTIFICATION_SENDER_MOCK:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh
+
+  endpoint:
+    health:
+      show-details: always

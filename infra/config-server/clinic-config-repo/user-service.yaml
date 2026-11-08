@@ -1,0 +1,58 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: user-service
+
+  datasource:
+    url: ${USER_SERVICE_DB_URL:jdbc:postgresql://localhost:5432/user_db}
+    username: ${USER_SERVICE_DB_USERNAME:postgres}
+    password: ${USER_SERVICE_DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:postgres_password}}
+    driver-class-name: org.postgresql.Driver
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:admin}
+    password: ${SPRING_RABBITMQ_PASSWORD:admin}
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+app:
+  auth:
+    jwt-issuer: ${JWT_ISSUER:clinic-appointment-system}
+    jwt-secret: ${JWT_SECRET:clinic-appointment-system-jwt-secret-key-super-secure-32bytes-min!}
+    access-token-max-age-seconds: ${ACCESS_TOKEN_MAX_AGE_SECONDS:3600}
+    refresh-token-max-age-seconds: ${REFRESH_TOKEN_MAX_AGE_SECONDS:604800}
+
+clients:
+  doctor-service:
+    base-url: ${DOCTOR_SERVICE_URL:http://localhost:8082}
+  patient-service:
+    base-url: ${PATIENT_SERVICE_URL:http://localhost:8084}
+
+logging:
+  level:
+    com.group01.user: INFO
+    com.group01.commonsecurity: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh
+  endpoint:
+    health:
+      show-details: always

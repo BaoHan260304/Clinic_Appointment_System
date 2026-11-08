@@ -1,0 +1,384 @@
+networks:
+  clinic-network:
+    driver: bridge
+
+# ==========================================
+# KHAI BÁO VOLUMES ĐỂ LƯU TRỮ DỮ LIỆU
+# ==========================================
+volumes:
+  appointment-db-data:
+  doctor-db-data:
+  notification-db-data:
+  patient-db-data:
+  payment-db-data:
+  user-db-data:
+  rabbitmq-data:
+
+services:
+  # ==========================================
+  # 1. ISOLATED DATABASES
+  # ==========================================
+  appointment-db:
+    image: postgres:15-alpine
+    container_name: appointment-db
+    environment:
+      POSTGRES_DB: appointment_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+    ports:
+      - "55432:5432"
+    networks:
+      - clinic-network
+    volumes:
+      - appointment-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d appointment_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  doctor-db:
+    image: postgres:15-alpine
+    container_name: doctor-db
+    environment:
+      POSTGRES_DB: doctor_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+    ports:
+      - "55433:5432"
+    networks:
+      - clinic-network
+    volumes:
+      - doctor-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d doctor_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  notification-db:
+    image: postgres:15-alpine
+    container_name: notification-db
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+    ports:
+      - "55434:5432"
+    networks:
+      - clinic-network
+    volumes:
+      - notification-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d notification_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  patient-db:
+    image: postgres:15-alpine
+    container_name: patient-db
+    environment:
+      POSTGRES_DB: patient_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+    ports:
+      - "55435:5432"
+    networks:
+      - clinic-network
+    volumes:
+      - patient-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d patient_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  user-db:
+    image: postgres:15-alpine
+    container_name: user-db
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+    ports:
+      - "55436:5432"
+    networks:
+      - clinic-network
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d user_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  payment-db:
+    image: postgres:15-alpine
+    container_name: payment-db
+    environment:
+      POSTGRES_DB: payment_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+    ports:
+      - "55437:5432"
+    networks:
+      - clinic-network
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d payment_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # 2. MESSAGE BROKERS
+  # ==========================================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq_clinic
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - clinic-network
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # 3. SPRING CLOUD INFRASTRUCTURE
+  # ==========================================
+  config-server:
+    build:
+      context: .
+      dockerfile: infra/config-server/Dockerfile
+    container_name: config-server
+    ports:
+      - "8889:8888"
+    volumes:
+      - ./infra/config-server/clinic-config-repo:/config-repo
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-native}
+      - CONFIG_NATIVE_REPO_URI=${CONFIG_NATIVE_REPO_URI:-file:///config-repo}
+      - CONFIG_GIT_REPO_URI=${CONFIG_GIT_REPO_URI:-https://github.com/hieult-dev/clinic-config-repo.git}
+      - GIT_USERNAME=${GIT_USERNAME:-}
+      - GIT_TOKEN=${GIT_TOKEN:-}
+      - ENCRYPT_KEY=${ENCRYPT_KEY:-clinic_default_encrypt_key_2026}
+    networks:
+      - clinic-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8888/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: infra/eureka-server/Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    networks:
+      - clinic-network
+    depends_on:
+      config-server:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8761/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: infra/api-gateway/Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - JWT_ISSUER=clinic-appointment-system
+      - USER_SERVICE_URI=http://user-service:8085
+      - PAYMENT_SERVICE_URI=http://payment-service:8086
+    networks:
+      - clinic-network
+    depends_on:
+      eureka-server:
+        condition: service_started
+
+  # ==========================================
+  # 4. BUSINESS MICROSERVICES
+  # ==========================================
+  appointment-service:
+    build:
+      context: .
+      dockerfile: services/appointment-service/Dockerfile
+    container_name: appointment-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - APPOINTMENT_DB_URL=jdbc:postgresql://appointment-db:5432/appointment_db
+      - APPOINTMENT_DB_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=admin
+      - DOCTOR_SERVICE_URL=http://doctor-service:8082
+      - PATIENT_SERVICE_URL=http://patient-service:8084
+      - USER_SERVICE_URL=http://user-service:8085
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8083
+    networks:
+      - clinic-network
+    depends_on:
+      eureka-server:
+        condition: service_started
+      appointment-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: services/payment-service/Dockerfile
+    container_name: payment-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - PAYMENT_DB_URL=jdbc:postgresql://payment-db:5432/payment_db
+      - PAYMENT_DB_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      - APPOINTMENT_SERVICE_URL=http://appointment-service:8081
+    networks:
+      - clinic-network
+    depends_on:
+      eureka-server:
+        condition: service_started
+      payment-db:
+        condition: service_healthy
+      appointment-service:
+        condition: service_started
+
+  doctor-service:
+    build:
+      context: .
+      dockerfile: services/doctor-service/Dockerfile
+    container_name: doctor-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - DOCTOR_DB_URL=jdbc:postgresql://doctor-db:5432/doctor_db
+      - DOCTOR_DB_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=admin
+    networks:
+      - clinic-network
+    depends_on:
+      eureka-server:
+        condition: service_started
+      doctor-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: services/notification-service/Dockerfile
+    container_name: notification-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - NOTIFICATION_DB_URL=jdbc:postgresql://notification-db:5432/notification_db
+      - NOTIFICATION_DB_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=admin
+      - NOTIFICATION_SENDER_MOCK=false
+    networks:
+      - clinic-network
+    depends_on:
+      eureka-server:
+        condition: service_started
+      notification-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  patient-service:
+    build:
+      context: .
+      dockerfile: services/patient-service/Dockerfile
+    container_name: patient-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - PATIENT_DB_URL=jdbc:postgresql://patient-db:5432/patient_db
+      - PATIENT_DB_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=admin
+    networks:
+      - clinic-network
+    depends_on:
+      eureka-server:
+        condition: service_started
+      patient-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  user-service:
+    build:
+      context: .
+      dockerfile: services/user-service/Dockerfile
+    container_name: user-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_URL=http://eureka-server:8761/eureka/
+      - USER_SERVICE_DB_URL=jdbc:postgresql://user-db:5432/user_db
+      - USER_SERVICE_DB_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=admin
+      - JWT_ISSUER=clinic-appointment-system
+      - DOCTOR_SERVICE_URL=http://doctor-service:8082
+      - PATIENT_SERVICE_URL=http://patient-service:8084
+    networks:
+      - clinic-network
+    depends_on:
+      eureka-server:
+        condition: service_started
+      user-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
