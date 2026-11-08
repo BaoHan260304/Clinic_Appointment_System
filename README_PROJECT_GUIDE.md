@@ -1,7 +1,7 @@
 # HƯỚNG DẪN DỰ ÁN HỆ THỐNG PHÒNG KHÁM MEDISYNC (MSS301)
 > **Môn học:** MSS301 - Microservices Architecture  
-> **Sinh viên thực hiện:** Đỗ Minh Quân  
-> **Kiến trúc:** Spring Boot Microservices + Clean Architecture + Event-Driven (RabbitMQ) + React Frontend (Vite)
+> **Nhóm thực hiện:** Group 09  
+> **Kiến trúc:** Spring Boot Microservices (com.group09) + Clean Architecture + Event-Driven (RabbitMQ) + React Frontend (Vite)
 
 ---
 
@@ -24,20 +24,39 @@ Dự án được xây dựng theo chuẩn kiến trúc doanh nghiệp:
 
 ---
 
-## 2. CÁCH KHỞI ĐỘNG HỆ THỐNG
+## 2. THÔNG SỐ KẾT NỐI DATABASE & HẠ TẦNG (DOCKER)
+Tất cả các database đều dùng hệ quản trị **PostgreSQL 16**, user: `postgres`, mật khẩu: `123`.
 
-### Cách 1: Chạy Hạ Tầng (Databases + RabbitMQ) bằng Docker
-Mở PowerShell tại thư mục gốc của dự án và chạy:
+| Dịch vụ | Container Name | Cổng Host | Tên Database | User / Mật khẩu |
+| :--- | :--- | :--- | :--- | :--- |
+| **User Service** | `user-db` | `55436` | `user_db` | `postgres` / `123` |
+| **Appointment Service** | `appointment-db` | `55432` | `appointment_db` | `postgres` / `123` |
+| **Doctor Service** | `doctor-db` | `55433` | `doctor_db` | `postgres` / `123` |
+| **Patient Service** | `patient-db` | `55435` | `patient_db` | `postgres` / `123` |
+| **Payment Service** | `payment-db` | `55437` | `payment_db` | `postgres` / `123` |
+| **Notification Service** | `notification-db` | `55434` | `notification_db` | `postgres` / `123` |
+| **RabbitMQ Management** | `rabbitmq_clinic`| `15672` (Web) / `5672` (AMQP) | - | `guest` / `guest` |
+
+---
+
+## 3. CÁCH KHỞI ĐỘNG HỆ THỐNG
+
+### Bước 1: Bật Hạ Tầng Database & RabbitMQ (Docker)
+Các container database và RabbitMQ hiện đang chạy sẵn trên máy bạn. Nếu cần bật lại:
 ```bash
 docker compose up -d appointment-db doctor-db patient-db user-db payment-db notification-db rabbitmq
 ```
 
-### Cách 2: Chạy Toàn Bộ Hệ Thống bằng Docker Compose
-```bash
-docker compose up --build -d
-```
+### Bước 2: Chạy Backend trên IntelliJ IDEA
+1. Mở thư mục gốc: `C:\Users\Quan\Documents\Chuyen nganh ki 8\MSS301\Code\clinic-appointment-system-main` trực tiếp bằng IntelliJ IDEA.
+2. Maven sẽ tự nhận diện 13 modules (`com.group09`).
+3. Chạy theo thứ tự ưu tiên:
+   - `EurekaServerApplication` (`infra/eureka-server`) -> Kiểm tra Dashboard tại `http://localhost:8761`
+   - `ConfigServerApplication` (`infra/config-server`)
+   - `ApiGatewayApplication` (`infra/api-gateway`)
+   - Các services nghiệp vụ: `UserServiceApplication`, `DoctorServiceApplication`, `AppointmentServiceApplication`, v.v.
 
-### Cách 3: Chạy Giao Diện Web (Frontend)
+### Bước 3: Chạy Giao Diện Web (Frontend)
 1. Double click file `START_UI.bat` ở thư mục gốc.
 2. Hoặc mở terminal gõ:
    ```bash
@@ -48,10 +67,10 @@ docker compose up --build -d
 
 ---
 
-## 3. CÁC TÍNH NĂNG NỔI BẬT ĐỂ DEMO VỚI GIẢNG VIÊN
+## 4. CÁC TÍNH NĂNG NỔI BẬT ĐỂ DEMO VỚI GIẢNG VIÊN
 
 1. **Chế độ Linh hoạt (Gateway Live / Demo Mode):**
-   * Ngay trên thanh Header có nút chuyển đổi giữa **Gateway Live (Port 8080)** và **Chế độ Demo Tự động**. Nếu đang demo mà backend chưa bật hoặc bị lỗi mạng, bạn chỉ cần bấm nút này là toàn bộ dữ liệu mẫu sẽ hiển thị mượt mà, không bao giờ bị đứng bài!
+   * Ngay trên thanh Header có nút chuyển đổi giữa **Gateway Live (Port 8080)** và **Chế độ Demo Tự động**. Nếu đang demo mà backend chưa bật hoặc đang test, bạn chỉ cần bấm nút này là toàn bộ dữ liệu mẫu sẽ hiển thị mượt mà!
 2. **Chuyển đổi vai trò người dùng (Role Switcher):**
    * Chuyển đổi nhanh giữa: **Bệnh nhân (Patient)**, **Bác sĩ (Doctor)** và **Quản trị viên (Admin)** để test các góc nhìn khác nhau.
 3. **Luồng Đặt Lịch & Thanh Toán Hoàn Chỉnh:**
