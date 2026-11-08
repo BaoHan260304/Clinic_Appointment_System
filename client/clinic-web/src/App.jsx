@@ -60,7 +60,7 @@ export default function App() {
       PATIENT: {
         userId: 'p2010000-0000-0000-0000-000000000001',
         patientId: 'p2010000-0000-0000-0000-000000000001',
-        name: 'Đỗ Minh Quân',
+        name: 'Nguyễn Mạnh Quân',
         role: 'PATIENT',
         email: 'quan.patient@example.com',
         title: 'Bệnh nhân'
@@ -192,12 +192,12 @@ export default function App() {
 
   // Pending counts for sidebar badge by role
   const myUpcomingAppointments = appointments.filter(a => 
-    (a.patientName === 'Đỗ Minh Quân' || a.patientId === currentUser?.patientId) && 
+    (a.patientName === 'Nguyễn Mạnh Quân' || a.patientId === currentUser?.patientId) && 
     (a.status === 'PENDING' || a.status === 'CONFIRMED')
   ).length;
 
   const myPendingPayments = payments.filter(p => 
-    (p.patientName === 'Đỗ Minh Quân' || p.patientId === currentUser?.patientId) && 
+    (p.patientName === 'Nguyễn Mạnh Quân' || p.patientId === currentUser?.patientId) && 
     p.status === 'PENDING'
   ).length;
 

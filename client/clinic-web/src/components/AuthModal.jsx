@@ -127,7 +127,7 @@ export default function AuthModal({ onClose, onLoginSuccess, onRegisterSuccess }
                   style={{ justifyContent: 'flex-start', background: 'white', fontSize: '12px' }}
                   onClick={() => handleLoginSubmit('quan.patient@example.com', 'secret123')}
                 >
-                  👤 <strong>Bệnh nhân</strong>: Đỗ Minh Quân (quan.patient@example.com)
+                  👤 <strong>Bệnh nhân</strong>: Nguyễn Mạnh Quân (quan.patient@example.com)
                 </button>
                 <button 
                   type="button" 

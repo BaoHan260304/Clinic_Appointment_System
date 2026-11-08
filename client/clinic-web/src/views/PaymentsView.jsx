@@ -6,7 +6,7 @@ export default function PaymentsView({ payments = [], currentUser, onPayPayment 
   const isPatient = role === 'PATIENT';
 
   const scopedPayments = isPatient 
-    ? payments.filter(p => p.patientName === 'Đỗ Minh Quân' || p.patientId === currentUser?.patientId)
+    ? payments.filter(p => p.patientName === 'Nguyễn Mạnh Quân' || p.patientId === currentUser?.patientId)
     : payments;
 
   const totalPaid = scopedPayments

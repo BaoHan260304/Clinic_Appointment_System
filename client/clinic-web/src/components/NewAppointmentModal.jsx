@@ -21,7 +21,7 @@ export default function NewAppointmentModal({
     setIsSubmitting(true);
     await onSubmit({
       patientId: currentUser?.userId || 'p2010000-0000-0000-0000-000000000001',
-      patientName: currentUser?.name || 'Đỗ Minh Quân',
+      patientName: currentUser?.name || 'Nguyễn Mạnh Quân',
       doctorId: selectedDoctor.id,
       doctorName: selectedDoctor.fullName,
       specialty: selectedDoctor.specialty,
@@ -52,7 +52,7 @@ export default function NewAppointmentModal({
             <input 
               type="text" 
               className="form-input" 
-              value={currentUser?.name || 'Đỗ Minh Quân'} 
+              value={currentUser?.name || 'Nguyễn Mạnh Quân'} 
               disabled 
               style={{ backgroundColor: '#f8fafc', color: '#64748b' }}
             />

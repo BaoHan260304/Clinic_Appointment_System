@@ -26,7 +26,7 @@ export default function Header({
       PATIENT: {
         userId: 'p2010000-0000-0000-0000-000000000001',
         patientId: 'p2010000-0000-0000-0000-000000000001',
-        name: 'Đỗ Minh Quân',
+        name: 'Nguyễn Mạnh Quân',
         role: 'PATIENT',
         email: 'quan.patient@example.com',
         title: 'Bệnh nhân'
@@ -98,7 +98,7 @@ export default function Header({
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
-                {currentUser?.name || 'Đỗ Minh Quân'}
+                {currentUser?.name || 'Nguyễn Mạnh Quân'}
               </span>
               <span style={{
                 fontSize: '10px',

@@ -33,7 +33,7 @@ export default function AppointmentsView({
   const scopedAppointments = appointments.filter(a => {
     if (!isPersonalScope) return true;
     if (role === 'PATIENT') {
-      return a.patientName === 'Đỗ Minh Quân' || a.patientId === currentUser?.patientId;
+      return a.patientName === 'Nguyễn Mạnh Quân' || a.patientId === currentUser?.patientId;
     }
     if (role === 'DOCTOR') {
       return a.doctorName?.includes('Nguyễn Văn An') || a.doctorId === currentUser?.doctorId;
@@ -174,7 +174,7 @@ export default function AppointmentsView({
                     </td>
                     <td>
                       <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.patientName}</div>
-                      {item.patientName === 'Đỗ Minh Quân' && (
+                      {item.patientName === 'Nguyễn Mạnh Quân' && (
                         <span style={{ fontSize: '10px', color: '#059669', fontWeight: 600 }}>Tài khoản của bạn</span>
                       )}
                     </td>

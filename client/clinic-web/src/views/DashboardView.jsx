@@ -28,11 +28,11 @@ export default function DashboardView({
   const role = currentUser?.role || 'PATIENT';
 
   // Role-specific datasets
-  const myAppointments = appointments.filter(a => a.patientName === 'Đỗ Minh Quân' || a.patientId === currentUser?.patientId);
+  const myAppointments = appointments.filter(a => a.patientName === 'Nguyễn Mạnh Quân' || a.patientId === currentUser?.patientId);
   const myPendingCount = myAppointments.filter(a => a.status === 'PENDING').length;
   const myConfirmedCount = myAppointments.filter(a => a.status === 'CONFIRMED').length;
   const myPaidRevenue = payments
-    .filter(p => (p.patientName === 'Đỗ Minh Quân' || p.patientId === currentUser?.patientId) && p.status === 'PAID')
+    .filter(p => (p.patientName === 'Nguyễn Mạnh Quân' || p.patientId === currentUser?.patientId) && p.status === 'PAID')
     .reduce((acc, cur) => acc + (cur.amount || 0), 0);
 
   const doctorAppointments = appointments.filter(a => a.doctorName?.includes('Nguyễn Văn An') || a.doctorId === currentUser?.doctorId);
@@ -65,7 +65,7 @@ export default function DashboardView({
               <Heart size={14} /> Chăm sóc sức khỏe toàn diện cho bạn
             </div>
             <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '6px' }}>
-              Xin chào, {currentUser?.name || 'Đỗ Minh Quân'}! 👋
+              Xin chào, {currentUser?.name || 'Nguyễn Mạnh Quân'}! 👋
             </h2>
             <p style={{ opacity: 0.95, fontSize: '14px', maxWidth: '600px' }}>
               Chào mừng bạn quay lại hệ thống khám bệnh MediSync. Tại đây bạn có thể đặt lịch khám nhanh, theo dõi kết quả và đóng viện phí trực tuyến an toàn.
@@ -140,7 +140,7 @@ export default function DashboardView({
             <div className="card-header">
               <div>
                 <h3 className="card-title">Lịch Khám Sắp Tới Của Bạn</h3>
-                <p style={{ fontSize: '13px', color: '#64748b' }}>Chỉ hiển thị các lịch hẹn riêng của bệnh nhân Đỗ Minh Quân</p>
+                <p style={{ fontSize: '13px', color: '#64748b' }}>Chỉ hiển thị các lịch hẹn riêng của bệnh nhân Nguyễn Mạnh Quân</p>
               </div>
               <button 
                 className="btn btn-secondary btn-sm"
@@ -206,7 +206,7 @@ export default function DashboardView({
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13px' }}>
               <div style={{ padding: '12px', background: '#ecfdf5', borderRadius: '8px', border: '1px solid #a7f3d0' }}>
-                <div style={{ fontWeight: 700, color: '#065f46' }}>Bệnh nhân: Đỗ Minh Quân</div>
+                <div style={{ fontWeight: 700, color: '#065f46' }}>Bệnh nhân: Nguyễn Mạnh Quân</div>
                 <div style={{ color: '#047857', marginTop: '4px' }}>Mã BN: p2010000-0001</div>
               </div>
 

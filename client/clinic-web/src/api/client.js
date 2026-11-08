@@ -51,12 +51,18 @@ export const api = {
   },
 
   getCurrentUser() {
-    return getStoredData(STORAGE_KEYS.USER, {
+    const user = getStoredData(STORAGE_KEYS.USER, {
       userId: 'p2010000-0000-0000-0000-000000000001',
-      name: 'Đỗ Minh Quân',
+      patientId: 'p2010000-0000-0000-0000-000000000001',
+      name: 'Nguyễn Mạnh Quân',
       email: 'quan.patient@example.com',
       role: 'PATIENT'
     });
+    if (user && user.name === 'Đỗ Minh Quân') {
+      user.name = 'Nguyễn Mạnh Quân';
+      this.setCurrentUser(user);
+    }
+    return user;
   },
 
   setCurrentUser(user) {
@@ -122,7 +128,7 @@ export const api = {
 
     // Mock Login
     let role = 'PATIENT';
-    let name = 'Đỗ Minh Quân';
+    let name = 'Nguyễn Mạnh Quân';
     let userId = 'p2010000-0000-0000-0000-000000000001';
     let patientId = 'p2010000-0000-0000-0000-000000000001';
     let doctorId = null;
@@ -269,7 +275,8 @@ export const api = {
         console.warn('Gateway offline, using local store:', e.message);
       }
     }
-    return getStoredData(STORAGE_KEYS.APPOINTMENTS, initialAppointments);
+    const list = getStoredData(STORAGE_KEYS.APPOINTMENTS, initialAppointments);
+    return list.map(a => a.patientName === 'Đỗ Minh Quân' ? { ...a, patientName: 'Nguyễn Mạnh Quân' } : a);
   },
 
   async createAppointment(data) {
@@ -288,7 +295,7 @@ export const api = {
     const newAppointment = {
       id: `a301-mock-${Date.now()}`,
       patientId: data.patientId || 'p2010000-0000-0000-0000-000000000001',
-      patientName: data.patientName || 'Đỗ Minh Quân',
+      patientName: data.patientName || 'Nguyễn Mạnh Quân',
       doctorId: data.doctorId,
       doctorName: data.doctorName || 'Bác sĩ chuyên khoa',
       specialty: data.specialty || 'Đa Khoa',
@@ -406,7 +413,8 @@ export const api = {
         return await this.request('/api/payments');
       } catch (e) {}
     }
-    return getStoredData(STORAGE_KEYS.PAYMENTS, initialPayments);
+    const list = getStoredData(STORAGE_KEYS.PAYMENTS, initialPayments);
+    return list.map(p => p.patientName === 'Đỗ Minh Quân' ? { ...p, patientName: 'Nguyễn Mạnh Quân' } : p);
   },
 
   async payPayment(paymentId) {

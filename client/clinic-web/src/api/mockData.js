@@ -52,7 +52,7 @@ export const initialDoctors = [
 export const initialPatients = [
   {
     id: "p2010000-0000-0000-0000-000000000001",
-    fullName: "Đỗ Minh Quân",
+    fullName: "Nguyễn Mạnh Quân",
     dob: "2002-05-15",
     gender: "Nam",
     phone: "0971 234 567",
@@ -89,7 +89,7 @@ export const initialAppointments = [
   {
     id: "a3010000-0000-0000-0000-000000000001",
     patientId: "p2010000-0000-0000-0000-000000000001",
-    patientName: "Đỗ Minh Quân",
+    patientName: "Nguyễn Mạnh Quân",
     doctorId: "d1010000-0000-0000-0000-000000000001",
     doctorName: "BS. CKI Nguyễn Văn An",
     specialty: "Nội Tổng Quát",
@@ -103,7 +103,7 @@ export const initialAppointments = [
   {
     id: "a3010000-0000-0000-0000-000000000004",
     patientId: "p2010000-0000-0000-0000-000000000001",
-    patientName: "Đỗ Minh Quân",
+    patientName: "Nguyễn Mạnh Quân",
     doctorId: "d1010000-0000-0000-0000-000000000002",
     doctorName: "ThS. BS Trần Thị Bích",
     specialty: "Tim Mạch",
@@ -176,7 +176,7 @@ export const initialPayments = [
   {
     id: "pay-101",
     appointmentId: "a3010000-0000-0000-0000-000000000001",
-    patientName: "Đỗ Minh Quân",
+    patientName: "Nguyễn Mạnh Quân",
     patientId: "p2010000-0000-0000-0000-000000000001",
     amount: 300000,
     currency: "VND",
@@ -188,7 +188,7 @@ export const initialPayments = [
   {
     id: "pay-104",
     appointmentId: "a3010000-0000-0000-0000-000000000004",
-    patientName: "Đỗ Minh Quân",
+    patientName: "Nguyễn Mạnh Quân",
     patientId: "p2010000-0000-0000-0000-000000000001",
     amount: 450000,
     currency: "VND",

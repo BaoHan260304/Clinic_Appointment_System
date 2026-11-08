@@ -7,7 +7,7 @@ export default function PatientsView({ patients = [], currentUser }) {
   const [viewScope, setViewScope] = useState('AUTO');
 
   const isPatientPersonal = role === 'PATIENT' && viewScope === 'AUTO';
-  const myRecord = patients.find(p => p.fullName === 'Đỗ Minh Quân') || patients[0];
+  const myRecord = patients.find(p => p.fullName === 'Nguyễn Mạnh Quân') || patients[0];
 
   return (
     <div>
@@ -147,7 +147,7 @@ export default function PatientsView({ patients = [], currentUser }) {
                     </td>
                     <td>
                       <div style={{ fontWeight: 700, color: '#0f172a' }}>{p.fullName}</div>
-                      {p.fullName === 'Đỗ Minh Quân' && (
+                      {p.fullName === 'Nguyễn Mạnh Quân' && (
                         <span style={{ fontSize: '10px', color: '#059669', fontWeight: 600 }}>Bệnh nhân đăng nhập</span>
                       )}
                     </td>

@@ -84,7 +84,7 @@ export default function RoleBanner({ currentUser, onSwitchRole }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '13px', fontWeight: 800, color: '#166534' }}>
-                GÓC NHÌN BỆNH NHÂN (Đỗ Minh Quân)
+                GÓC NHÌN BỆNH NHÂN (Nguyễn Mạnh Quân)
               </span>
               <span style={{
                 fontSize: '11px',
