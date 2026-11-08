@@ -133,9 +133,9 @@ curl http://localhost:8083/actuator/health
 
 ## 📍 KEY FILES
 
-**Domain:** \src/main/java/com/group01/notification/domain/\
-**App:** \src/main/java/com/group01/notification/application/\
-**Infra:** \src/main/java/com/group01/notification/infrastructure/\
+**Domain:** \src/main/java/com/group09/notification/domain/\
+**App:** \src/main/java/com/group09/notification/application/\
+**Infra:** \src/main/java/com/group09/notification/infrastructure/\
 **Config:** \src/main/resources/application.yml\
 **Docs:** \D:\mss-clinic\clinic-appointment-system\docs\notification-service\
 

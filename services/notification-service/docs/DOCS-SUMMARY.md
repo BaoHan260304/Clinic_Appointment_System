@@ -59,7 +59,7 @@
 
 \\\
 notification-service/
-├── src/main/java/com/group01/notification/
+├── src/main/java/com/group09/notification/
 │   ├── domain/          (16 files) ✅ DONE
 │   ├── application/     (3 files) ✅ DONE
 │   ├── infrastructure/  (2 files) ✅ DONE

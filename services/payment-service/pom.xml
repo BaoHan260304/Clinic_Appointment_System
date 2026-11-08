@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.group01</groupId>
+        <groupId>com.group09</groupId>
         <artifactId>clinic-appointment-system</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
@@ -16,7 +16,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.group01</groupId>
+            <groupId>com.group09</groupId>
             <artifactId>common-security</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -1,0 +1,38 @@
+package com.group09.notification.application.usecase.impl;
+
+import com.group09.notification.application.usecase.UpdateNotificationUseCase;
+import com.group09.notification.domain.aggregate.NotificationAggregate;
+import com.group09.notification.domain.repository.NotificationRepository;
+import com.group09.notification.domain.vo.NotificationId;
+import com.group09.notification.domain.vo.NotificationTitle;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UpdateNotificationUseCaseImpl implements UpdateNotificationUseCase {
+
+    private final NotificationRepository notificationRepository;
+
+    public UpdateNotificationUseCaseImpl(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
+
+    @Override
+    public NotificationAggregate handle(NotificationId notificationId, String title, String body) {
+        NotificationAggregate notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông báo: " + notificationId.value()));
+        
+        notification.updateContent(NotificationTitle.of(title), body);
+
+        return notificationRepository.save(notification);
+    }
+
+    @Override
+    public NotificationAggregate markAsRead(NotificationId notificationId) {
+        NotificationAggregate notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông báo: " + notificationId.value()));
+
+        notification.markAsRead();
+
+        return notificationRepository.save(notification);
+    }
+}

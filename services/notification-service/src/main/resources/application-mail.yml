@@ -16,5 +16,5 @@ notification:
 # Logging for email debugging
 logging:
   level:
-    com.group01.notification.infrastructure.sender: DEBUG
+    com.group09.notification.infrastructure.sender: DEBUG
     org.springframework.mail: DEBUG
