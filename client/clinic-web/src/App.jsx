@@ -190,14 +190,18 @@ export default function App() {
     showToast('Bạn đã đăng xuất khỏi hệ thống.');
   };
 
+  const pName = (!currentUser?.name || currentUser.name.includes('@') || currentUser.name === 'quan.patient' || currentUser.name === 'Đỗ Minh Quân')
+    ? 'Nguyễn Mạnh Quân'
+    : currentUser.name;
+
   // Pending counts for sidebar badge by role
   const myUpcomingAppointments = appointments.filter(a => 
-    (a.patientName === 'Nguyễn Mạnh Quân' || a.patientId === currentUser?.patientId) && 
+    (a.patientName === pName || a.patientName === 'Nguyễn Mạnh Quân' || a.patientId === currentUser?.patientId) && 
     (a.status === 'PENDING' || a.status === 'CONFIRMED')
   ).length;
 
   const myPendingPayments = payments.filter(p => 
-    (p.patientName === 'Nguyễn Mạnh Quân' || p.patientId === currentUser?.patientId) && 
+    (p.patientName === pName || p.patientName === 'Nguyễn Mạnh Quân' || p.patientId === currentUser?.patientId) && 
     p.status === 'PENDING'
   ).length;
 

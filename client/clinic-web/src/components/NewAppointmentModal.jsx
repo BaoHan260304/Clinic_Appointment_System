@@ -16,12 +16,16 @@ export default function NewAppointmentModal({
 
   const selectedDoctor = doctors.find(d => d.id === selectedDoctorId) || doctors[0];
 
+  const patientDisplayName = (!currentUser?.name || currentUser.name.includes('@') || currentUser.name === 'quan.patient' || currentUser.name === 'Đỗ Minh Quân')
+    ? 'Nguyễn Mạnh Quân'
+    : currentUser.name;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     await onSubmit({
       patientId: currentUser?.userId || 'p2010000-0000-0000-0000-000000000001',
-      patientName: currentUser?.name || 'Nguyễn Mạnh Quân',
+      patientName: patientDisplayName,
       doctorId: selectedDoctor.id,
       doctorName: selectedDoctor.fullName,
       specialty: selectedDoctor.specialty,
@@ -52,7 +56,7 @@ export default function NewAppointmentModal({
             <input 
               type="text" 
               className="form-input" 
-              value={currentUser?.name || 'Nguyễn Mạnh Quân'} 
+              value={patientDisplayName} 
               disabled 
               style={{ backgroundColor: '#f8fafc', color: '#64748b' }}
             />

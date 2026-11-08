@@ -144,6 +144,12 @@ export const api = {
       name = 'Quản trị viên Hệ thống';
       userId = 'admin-01';
       patientId = null;
+    } else if (email.includes('quan') || email.includes('patient') || email === 'quan.patient@example.com') {
+      role = 'PATIENT';
+      name = 'Nguyễn Mạnh Quân';
+      userId = 'p2010000-0000-0000-0000-000000000001';
+      patientId = 'p2010000-0000-0000-0000-000000000001';
+      doctorId = null;
     } else {
       const customUsers = getStoredData('clinic_registered_users', []);
       const matched = customUsers.find(u => u.email === email);
@@ -276,7 +282,14 @@ export const api = {
       }
     }
     const list = getStoredData(STORAGE_KEYS.APPOINTMENTS, initialAppointments);
-    return list.map(a => a.patientName === 'Đỗ Minh Quân' ? { ...a, patientName: 'Nguyễn Mạnh Quân' } : a);
+    const cleaned = list.map(a => {
+      if (a.patientName === 'quan.patient' || a.patientName === 'Đỗ Minh Quân' || a.patientName?.includes('@')) {
+        return { ...a, patientName: 'Nguyễn Mạnh Quân' };
+      }
+      return a;
+    });
+    setStoredData(STORAGE_KEYS.APPOINTMENTS, cleaned);
+    return cleaned;
   },
 
   async createAppointment(data) {
@@ -291,11 +304,16 @@ export const api = {
       }
     }
 
+    let cleanPatientName = data.patientName;
+    if (!cleanPatientName || cleanPatientName.includes('@') || cleanPatientName === 'quan.patient' || cleanPatientName === 'Đỗ Minh Quân') {
+      cleanPatientName = 'Nguyễn Mạnh Quân';
+    }
+
     const list = await this.getAppointments();
     const newAppointment = {
       id: `a301-mock-${Date.now()}`,
       patientId: data.patientId || 'p2010000-0000-0000-0000-000000000001',
-      patientName: data.patientName || 'Nguyễn Mạnh Quân',
+      patientName: cleanPatientName,
       doctorId: data.doctorId,
       doctorName: data.doctorName || 'Bác sĩ chuyên khoa',
       specialty: data.specialty || 'Đa Khoa',
@@ -414,7 +432,14 @@ export const api = {
       } catch (e) {}
     }
     const list = getStoredData(STORAGE_KEYS.PAYMENTS, initialPayments);
-    return list.map(p => p.patientName === 'Đỗ Minh Quân' ? { ...p, patientName: 'Nguyễn Mạnh Quân' } : p);
+    const cleaned = list.map(p => {
+      if (p.patientName === 'quan.patient' || p.patientName === 'Đỗ Minh Quân' || p.patientName?.includes('@')) {
+        return { ...p, patientName: 'Nguyễn Mạnh Quân' };
+      }
+      return p;
+    });
+    setStoredData(STORAGE_KEYS.PAYMENTS, cleaned);
+    return cleaned;
   },
 
   async payPayment(paymentId) {

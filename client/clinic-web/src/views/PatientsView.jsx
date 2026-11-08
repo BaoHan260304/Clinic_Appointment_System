@@ -4,10 +4,12 @@ import { Users, FileText, Phone, Mail, MapPin, AlertCircle, Heart, Shield, Lock,
 export default function PatientsView({ patients = [], currentUser }) {
   const role = currentUser?.role || 'PATIENT';
   const [selectedPatient, setSelectedPatient] = useState(null);
-  const [viewScope, setViewScope] = useState('AUTO');
 
-  const isPatientPersonal = role === 'PATIENT' && viewScope === 'AUTO';
-  const myRecord = patients.find(p => p.fullName === 'Nguyễn Mạnh Quân') || patients[0];
+  const isPatientPersonal = role === 'PATIENT';
+  const pName = (!currentUser?.name || currentUser.name.includes('@') || currentUser.name === 'quan.patient' || currentUser.name === 'Đỗ Minh Quân')
+    ? 'Nguyễn Mạnh Quân'
+    : currentUser.name;
+  const myRecord = patients.find(p => p.fullName === pName || p.fullName === 'Nguyễn Mạnh Quân') || patients[0];
 
   return (
     <div>
@@ -34,17 +36,6 @@ export default function PatientsView({ patients = [], currentUser }) {
               : 'Quản lý thông tin cá nhân và lịch sử bệnh án (Bác sĩ & Quản trị viên)'}
           </p>
         </div>
-
-        {role === 'PATIENT' && (
-          <button
-            className={`btn btn-sm ${viewScope === 'ALL' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setViewScope(prev => prev === 'AUTO' ? 'ALL' : 'AUTO')}
-            title="Kiểm tra phân quyền: Xem thử danh sách bệnh nhân toàn viện"
-          >
-            <Eye size={14} />
-            <span>{viewScope === 'AUTO' ? 'Xem danh bạ toàn viện (Admin Mode)' : 'Về hồ sơ của tôi'}</span>
-          </button>
-        )}
       </div>
 
       {/* IF PATIENT PERSONAL VIEW */}

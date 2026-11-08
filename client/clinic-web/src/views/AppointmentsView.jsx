@@ -25,20 +25,22 @@ export default function AppointmentsView({
   const role = currentUser?.role || 'PATIENT';
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewScope, setViewScope] = useState('AUTO'); // 'AUTO' (filtered by role) or 'ALL' (system-wide)
 
-  // Determine list based on role and view scope
-  const isPersonalScope = viewScope === 'AUTO' && role !== 'ADMIN';
-
+  // Strictly filter appointments by role: Patient only sees own appointments, Doctor sees own doctor appointments
   const scopedAppointments = appointments.filter(a => {
-    if (!isPersonalScope) return true;
     if (role === 'PATIENT') {
-      return a.patientName === 'Nguyễn Mạnh Quân' || a.patientId === currentUser?.patientId;
+      const pName = (!currentUser?.name || currentUser.name.includes('@') || currentUser.name === 'quan.patient' || currentUser.name === 'Đỗ Minh Quân')
+        ? 'Nguyễn Mạnh Quân'
+        : currentUser.name;
+
+      return a.patientName === pName || 
+             a.patientName === 'Nguyễn Mạnh Quân' || 
+             (currentUser?.patientId && a.patientId === currentUser.patientId);
     }
     if (role === 'DOCTOR') {
       return a.doctorName?.includes('Nguyễn Văn An') || a.doctorId === currentUser?.doctorId;
     }
-    return true;
+    return true; // ADMIN sees all
   });
 
   const filteredAppointments = scopedAppointments.filter(a => {
@@ -79,18 +81,6 @@ export default function AppointmentsView({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Toggle scope button for demo clarity */}
-          {role !== 'ADMIN' && (
-            <button
-              className={`btn btn-sm ${viewScope === 'ALL' ? 'btn-primary' : 'btn-secondary'}`}
-              onClick={() => setViewScope(prev => prev === 'AUTO' ? 'ALL' : 'AUTO')}
-              title="Bấm để xem lịch cá nhân hoặc xem tất cả lịch phòng khám để kiểm tra phân quyền"
-            >
-              <Eye size={14} />
-              <span>{viewScope === 'AUTO' ? 'Xem cả lịch toàn viện' : 'Về lịch cá nhân'}</span>
-            </button>
-          )}
-
           {/* Patient or Admin can create appointment; Doctors don't create appointments */}
           {role !== 'DOCTOR' && (
             <button className="btn btn-primary" onClick={onNewAppointmentClick}>

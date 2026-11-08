@@ -27,12 +27,16 @@ export default function DashboardView({
 }) {
   const role = currentUser?.role || 'PATIENT';
 
+  const pName = (!currentUser?.name || currentUser.name.includes('@') || currentUser.name === 'quan.patient' || currentUser.name === 'Đỗ Minh Quân')
+    ? 'Nguyễn Mạnh Quân'
+    : currentUser.name;
+
   // Role-specific datasets
-  const myAppointments = appointments.filter(a => a.patientName === 'Nguyễn Mạnh Quân' || a.patientId === currentUser?.patientId);
+  const myAppointments = appointments.filter(a => a.patientName === pName || a.patientName === 'Nguyễn Mạnh Quân' || a.patientId === currentUser?.patientId);
   const myPendingCount = myAppointments.filter(a => a.status === 'PENDING').length;
   const myConfirmedCount = myAppointments.filter(a => a.status === 'CONFIRMED').length;
   const myPaidRevenue = payments
-    .filter(p => (p.patientName === 'Nguyễn Mạnh Quân' || p.patientId === currentUser?.patientId) && p.status === 'PAID')
+    .filter(p => (p.patientName === pName || p.patientName === 'Nguyễn Mạnh Quân' || p.patientId === currentUser?.patientId) && p.status === 'PAID')
     .reduce((acc, cur) => acc + (cur.amount || 0), 0);
 
   const doctorAppointments = appointments.filter(a => a.doctorName?.includes('Nguyễn Văn An') || a.doctorId === currentUser?.doctorId);
