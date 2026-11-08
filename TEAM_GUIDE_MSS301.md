@@ -42,3 +42,39 @@
 3. **Chạy Web UI:**
    Nhấp đúp file **`START_UI.bat`** tại thư mục gốc để mở `http://localhost:5173`.
    *(Mỗi người chỉ việc chọn màn hình của mình trên Sidebar và thực hiện các bước demo như bảng trên!)*
+
+---
+
+## 🗄️ CƠ CHẾ DATABASE PER SERVICE & HƯỚNG DẪN KẾT NỐI (DATAGRIP / DBEAVER)
+
+Hệ thống áp dụng chuẩn kiến trúc **Database per Service**: Mỗi microservice sở hữu một Database PostgreSQL hoàn toàn độc lập, không dùng chung schema, giúp đảm bảo tính đóng gói (Encapsulation) và chống phụ thuộc dữ liệu.
+
+### 1. Bảng Phân Chia Database Cho Từng Người:
+
+| Thành viên | Tên Database | Port kết nối Host | User / Mật khẩu | Các Bảng dữ liệu chính phụ trách |
+| :--- | :--- | :---: | :---: | :--- |
+| **Nam** | `user_db` | **`55436`** | `postgres` / `123` | `users`, `roles`, `user_roles`, `refresh_tokens` |
+| **Quân** | `appointment_db` | **`55432`** | `postgres` / `123` | `appointments`, `appointment_status_history` |
+| **Long** | `doctor_db`<br>`patient_db` | **`55433`**<br>**`55435`** | `postgres` / `123`<br>`postgres` / `123` | `doctors`, `slots`, `doctor_schedules`, `doctor_leaves`<br>`patients`, `medical_records` |
+| **Vũ** | `payment_db`<br>`notification_db` | **`55437`**<br>**`55434`** | `postgres` / `123`<br>`postgres` / `123` | `payments`, `invoices`, `transactions`<br>`notifications`, `notification_logs` |
+| **Tất cả** | **RabbitMQ Broker** | **`15672`** (Web)<br>**`5672`** (AMQP) | `guest` / `guest` | Exchange: `clinic.exchange`, Queues: `notification.*` |
+
+---
+
+### 2. Thành viên có cần tự tạo bảng hay import file SQL không?
+👉 **HOÀN TOÀN KHÔNG CẦN! Hệ thống đã tích hợp sẵn Flyway Migration tự động 100%:**
+* Khi các bạn chạy lệnh `docker compose up -d`, Docker sẽ tự động dựng 6 Database PostgreSQL rỗng.
+* Khi từng bạn bấm **Run** service của mình trên IntelliJ, thư viện **Flyway Migration** (nằm trong thư mục `src/main/resources/db/migration/`) sẽ tự động kết nối, tự động tạo toàn bộ bảng, khóa chính, khóa ngoại và nạp sẵn dữ liệu mẫu ban đầu (bác sĩ, phòng khám, bệnh nhân).
+* Bạn không cần phải mở terminal gõ SQL hay lo lắng việc thiếu dữ liệu!
+
+---
+
+### 3. Cách Kết Nối DataGrip / DBeaver / pgAdmin Để Xem Bảng & Trả Lời Vấn Đáp:
+Khi thầy cô yêu cầu: *"Mở Database cho tôi xem bảng dữ liệu của em"*, các bạn mở **DataGrip** hoặc **DBeaver** và tạo kết nối PostgreSQL như sau:
+
+* **Host:** `localhost`
+* **Port:** Điền đúng Port của mình ở bảng trên (Ví dụ Nam điền `55436`, Long điền `55433`, ...).
+* **Database:** Điền đúng tên DB của mình (Ví dụ: `user_db`, `doctor_db`, ...).
+* **User:** `postgres`
+* **Password:** `123`
+* Bấm **Test Connection** ➔ Báo `Succeeded` ➔ Bấm **OK** để duyệt bảng dữ liệu.
