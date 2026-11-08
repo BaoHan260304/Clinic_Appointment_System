@@ -7,7 +7,7 @@ echo Notification Service - Build & Run
 echo ============================================
 echo.
 
-cd /d "D:\clinic-appointment-system\services\notification-service"
+cd /d "%~dp0"
 
 echo [1/3] Running Maven clean compile...
 call mvn clean compile -DskipTests
