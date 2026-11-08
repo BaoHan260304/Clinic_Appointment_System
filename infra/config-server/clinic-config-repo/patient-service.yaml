@@ -8,7 +8,7 @@ spring:
   datasource:
     url: ${PATIENT_DB_URL:jdbc:postgresql://localhost:5432/patient_db}
     username: ${PATIENT_DB_USERNAME:postgres}
-    password: ${PATIENT_DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:postgres_password}}
+    password: ${PATIENT_DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:123}}
     driver-class-name: org.postgresql.Driver
 
   rabbitmq:

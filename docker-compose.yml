@@ -24,7 +24,7 @@ services:
     environment:
       POSTGRES_DB: appointment_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_PASSWORD: "123"
     ports:
       - "55432:5432"
     networks:
@@ -43,7 +43,7 @@ services:
     environment:
       POSTGRES_DB: doctor_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_PASSWORD: "123"
     ports:
       - "55433:5432"
     networks:
@@ -62,7 +62,7 @@ services:
     environment:
       POSTGRES_DB: notification_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_PASSWORD: "123"
     ports:
       - "55434:5432"
     networks:
@@ -81,7 +81,7 @@ services:
     environment:
       POSTGRES_DB: patient_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_PASSWORD: "123"
     ports:
       - "55435:5432"
     networks:
@@ -100,7 +100,7 @@ services:
     environment:
       POSTGRES_DB: user_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_PASSWORD: "123"
     ports:
       - "55436:5432"
     networks:
@@ -119,7 +119,7 @@ services:
     environment:
       POSTGRES_DB: payment_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_PASSWORD: "123"
     ports:
       - "55437:5432"
     networks:
@@ -238,7 +238,7 @@ services:
       - EUREKA_URL=http://eureka-server:8761/eureka/
       - APPOINTMENT_DB_URL=jdbc:postgresql://appointment-db:5432/appointment_db
       - APPOINTMENT_DB_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      - SPRING_DATASOURCE_PASSWORD=123
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USERNAME=admin
       - SPRING_RABBITMQ_PASSWORD=admin
@@ -267,7 +267,7 @@ services:
       - EUREKA_URL=http://eureka-server:8761/eureka/
       - PAYMENT_DB_URL=jdbc:postgresql://payment-db:5432/payment_db
       - PAYMENT_DB_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      - SPRING_DATASOURCE_PASSWORD=123
       - APPOINTMENT_SERVICE_URL=http://appointment-service:8081
     networks:
       - clinic-network
@@ -290,7 +290,7 @@ services:
       - EUREKA_URL=http://eureka-server:8761/eureka/
       - DOCTOR_DB_URL=jdbc:postgresql://doctor-db:5432/doctor_db
       - DOCTOR_DB_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      - SPRING_DATASOURCE_PASSWORD=123
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USERNAME=admin
       - SPRING_RABBITMQ_PASSWORD=admin
@@ -315,7 +315,7 @@ services:
       - EUREKA_URL=http://eureka-server:8761/eureka/
       - NOTIFICATION_DB_URL=jdbc:postgresql://notification-db:5432/notification_db
       - NOTIFICATION_DB_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      - SPRING_DATASOURCE_PASSWORD=123
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USERNAME=admin
       - SPRING_RABBITMQ_PASSWORD=admin
@@ -341,7 +341,7 @@ services:
       - EUREKA_URL=http://eureka-server:8761/eureka/
       - PATIENT_DB_URL=jdbc:postgresql://patient-db:5432/patient_db
       - PATIENT_DB_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      - SPRING_DATASOURCE_PASSWORD=123
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USERNAME=admin
       - SPRING_RABBITMQ_PASSWORD=admin
@@ -366,7 +366,7 @@ services:
       - EUREKA_URL=http://eureka-server:8761/eureka/
       - USER_SERVICE_DB_URL=jdbc:postgresql://user-db:5432/user_db
       - USER_SERVICE_DB_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      - SPRING_DATASOURCE_PASSWORD=123
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USERNAME=admin
       - SPRING_RABBITMQ_PASSWORD=admin
