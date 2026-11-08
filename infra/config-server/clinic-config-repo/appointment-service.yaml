@@ -6,7 +6,7 @@ spring:
     name: appointment-service
 
   datasource:
-    url: ${APPOINTMENT_DB_URL:jdbc:postgresql://localhost:5432/appointment_db}
+    url: ${APPOINTMENT_DB_URL:jdbc:postgresql://localhost:55432/appointment_db}
     username: ${APPOINTMENT_DB_USERNAME:postgres}
     password: ${APPOINTMENT_DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:123}}
     driver-class-name: org.postgresql.Driver

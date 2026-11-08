@@ -6,7 +6,7 @@ spring:
     name: patient-service
 
   datasource:
-    url: ${PATIENT_DB_URL:jdbc:postgresql://localhost:5432/patient_db}
+    url: ${PATIENT_DB_URL:jdbc:postgresql://localhost:55435/patient_db}
     username: ${PATIENT_DB_USERNAME:postgres}
     password: ${PATIENT_DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:123}}
     driver-class-name: org.postgresql.Driver
