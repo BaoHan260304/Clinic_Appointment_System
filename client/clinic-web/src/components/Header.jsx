@@ -21,16 +21,33 @@ export default function Header({
 
   const handleRoleChange = (e) => {
     const role = e.target.value;
-    const names = {
-      PATIENT: 'Đỗ Minh Quân (Bệnh nhân)',
-      DOCTOR: 'BS. CKI Nguyễn Văn An (Bác sĩ)',
-      ADMIN: 'Quản trị viên Hệ thống'
+    const profiles = {
+      PATIENT: {
+        userId: 'p2010000-0000-0000-0000-000000000001',
+        patientId: 'p2010000-0000-0000-0000-000000000001',
+        name: 'Đỗ Minh Quân',
+        role: 'PATIENT',
+        email: 'quan.patient@example.com',
+        title: 'Bệnh nhân'
+      },
+      DOCTOR: {
+        userId: 'd1010000-0000-0000-0000-000000000001',
+        doctorId: 'd1010000-0000-0000-0000-000000000001',
+        name: 'BS. CKI Nguyễn Văn An',
+        role: 'DOCTOR',
+        email: 'bs.an@clinic.local',
+        title: 'Bác sĩ - Nội Tổng Quát'
+      },
+      ADMIN: {
+        userId: 'admin-01',
+        name: 'Quản trị viên Hệ thống',
+        role: 'ADMIN',
+        email: 'admin@medisync.local',
+        title: 'Quản trị viên'
+      }
     };
-    setCurrentUser(prev => ({
-      ...prev,
-      role,
-      name: names[role] || 'Người dùng'
-    }));
+    const selected = profiles[role] || profiles.PATIENT;
+    setCurrentUser(selected);
   };
 
   const toggleMode = () => {
@@ -69,13 +86,30 @@ export default function Header({
         </div>
 
         {/* User Badge */}
-        <div className="user-badge">
-          <div className="avatar">
-            {currentUser?.name?.charAt(0) || 'U'}
+        <div className="user-badge" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="avatar" style={{
+            backgroundColor: currentUser?.role === 'ADMIN' ? '#7c3aed' : currentUser?.role === 'DOCTOR' ? '#2563eb' : '#0d9488',
+            color: '#fff',
+            fontWeight: 700
+          }}>
+            {currentUser?.role === 'ADMIN' ? 'AD' : currentUser?.role === 'DOCTOR' ? 'BS' : 'BN'}
           </div>
           <div>
-            <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
-              {currentUser?.name || 'Đỗ Minh Quân'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                {currentUser?.name || 'Đỗ Minh Quân'}
+              </span>
+              <span style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                padding: '1px 6px',
+                borderRadius: '999px',
+                backgroundColor: currentUser?.role === 'ADMIN' ? '#f5f3ff' : currentUser?.role === 'DOCTOR' ? '#eff6ff' : '#ecfdf5',
+                color: currentUser?.role === 'ADMIN' ? '#7c3aed' : currentUser?.role === 'DOCTOR' ? '#2563eb' : '#059669',
+                border: `1px solid ${currentUser?.role === 'ADMIN' ? '#ddd6fe' : currentUser?.role === 'DOCTOR' ? '#bfdbfe' : '#a7f3d0'}`
+              }}>
+                {currentUser?.role === 'ADMIN' ? 'Admin' : currentUser?.role === 'DOCTOR' ? 'Bác sĩ' : 'Bệnh nhân'}
+              </span>
             </div>
             <div style={{ fontSize: '11px', color: '#64748b' }}>
               {currentUser?.email || 'quan.patient@example.com'}

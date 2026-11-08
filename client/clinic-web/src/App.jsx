@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+import RoleBanner from './components/RoleBanner';
 import DashboardView from './views/DashboardView';
 import AppointmentsView from './views/AppointmentsView';
 import DoctorsView from './views/DoctorsView';
@@ -54,6 +55,37 @@ export default function App() {
     setCurrentUserState(updated);
   };
 
+  const handleRoleSwitch = (role) => {
+    const profiles = {
+      PATIENT: {
+        userId: 'p2010000-0000-0000-0000-000000000001',
+        patientId: 'p2010000-0000-0000-0000-000000000001',
+        name: 'Đỗ Minh Quân',
+        role: 'PATIENT',
+        email: 'quan.patient@example.com',
+        title: 'Bệnh nhân'
+      },
+      DOCTOR: {
+        userId: 'd1010000-0000-0000-0000-000000000001',
+        doctorId: 'd1010000-0000-0000-0000-000000000001',
+        name: 'BS. CKI Nguyễn Văn An',
+        role: 'DOCTOR',
+        email: 'bs.an@clinic.local',
+        title: 'Bác sĩ - Nội Tổng Quát'
+      },
+      ADMIN: {
+        userId: 'admin-01',
+        name: 'Quản trị viên Hệ thống',
+        role: 'ADMIN',
+        email: 'admin@medisync.local',
+        title: 'Quản trị viên'
+      }
+    };
+    const selected = profiles[role] || profiles.PATIENT;
+    setCurrentUser(selected);
+    showToast(`Đã chuyển sang vai trò: ${role === 'PATIENT' ? 'Bệnh nhân' : role === 'DOCTOR' ? 'Bác sĩ' : 'Quản trị viên'}`);
+  };
+
   // Load data
   const loadAllData = async () => {
     try {
@@ -81,7 +113,7 @@ export default function App() {
   // Handlers
   const handleCreateAppointment = async (formData) => {
     try {
-      const created = await api.createAppointment(formData);
+      await api.createAppointment(formData);
       await loadAllData();
       showToast('Đặt lịch khám thành công! Sự kiện đã được gửi qua RabbitMQ.');
     } catch (err) {
@@ -93,9 +125,19 @@ export default function App() {
     try {
       await api.confirmAppointment(id);
       await loadAllData();
-      showToast('Đã xác nhận lịch hẹn thành công!');
+      showToast('Bác sĩ đã xác nhận duyệt lịch hẹn thành công!');
     } catch (err) {
       showToast('Lỗi khi xác nhận lịch: ' + err.message, 'error');
+    }
+  };
+
+  const handleCompleteAppointment = async (id) => {
+    try {
+      await api.completeAppointment(id);
+      await loadAllData();
+      showToast('Đã xác nhận hoàn tất ca khám bệnh!');
+    } catch (err) {
+      showToast('Lỗi khi hoàn tất ca khám: ' + err.message, 'error');
     }
   };
 
@@ -130,7 +172,22 @@ export default function App() {
     showToast(`Đăng nhập thành công với tài khoản: ${email}`);
   };
 
-  // Pending counts for sidebar badge
+  // Pending counts for sidebar badge by role
+  const myUpcomingAppointments = appointments.filter(a => 
+    (a.patientName === 'Đỗ Minh Quân' || a.patientId === currentUser?.patientId) && 
+    (a.status === 'PENDING' || a.status === 'CONFIRMED')
+  ).length;
+
+  const myPendingPayments = payments.filter(p => 
+    (p.patientName === 'Đỗ Minh Quân' || p.patientId === currentUser?.patientId) && 
+    p.status === 'PENDING'
+  ).length;
+
+  const doctorPendingAppointments = appointments.filter(a => 
+    (a.doctorName?.includes('Nguyễn Văn An') || a.doctorId === currentUser?.doctorId) && 
+    a.status === 'PENDING'
+  ).length;
+
   const pendingAppointments = appointments.filter(a => a.status === 'PENDING').length;
   const pendingPayments = payments.filter(p => p.status === 'PENDING').length;
 
@@ -164,7 +221,14 @@ export default function App() {
       <Sidebar 
         currentTab={currentTab} 
         setCurrentTab={setCurrentTab} 
-        stats={{ pendingAppointments, pendingPayments }}
+        currentUser={currentUser}
+        stats={{ 
+          myUpcomingAppointments,
+          myPendingPayments,
+          doctorPendingAppointments,
+          pendingAppointments, 
+          pendingPayments 
+        }}
       />
 
       {/* Main Content Area */}
@@ -179,11 +243,18 @@ export default function App() {
         />
 
         <main className="content-area">
+          {/* Prominent Role Indicator Banner */}
+          <RoleBanner 
+            currentUser={currentUser} 
+            onSwitchRole={handleRoleSwitch} 
+          />
+
           {currentTab === 'dashboard' && (
             <DashboardView 
               appointments={appointments}
               doctors={doctors}
               payments={payments}
+              currentUser={currentUser}
               onNewAppointmentClick={() => {
                 setSelectedDoctorForBooking(null);
                 setIsNewAppointmentOpen(true);
@@ -195,11 +266,13 @@ export default function App() {
           {currentTab === 'appointments' && (
             <AppointmentsView 
               appointments={appointments}
+              currentUser={currentUser}
               onNewAppointmentClick={() => {
                 setSelectedDoctorForBooking(null);
                 setIsNewAppointmentOpen(true);
               }}
               onConfirmAppointment={handleConfirmAppointment}
+              onCompleteAppointment={handleCompleteAppointment}
               onCancelAppointment={handleCancelAppointment}
               onOpenPaymentModal={(appt) => setPaymentTargetAppointment(appt)}
             />
@@ -208,6 +281,7 @@ export default function App() {
           {currentTab === 'doctors' && (
             <DoctorsView 
               doctors={doctors}
+              currentUser={currentUser}
               onBookWithDoctor={handleBookWithDoctor}
             />
           )}
@@ -215,12 +289,14 @@ export default function App() {
           {currentTab === 'patients' && (
             <PatientsView 
               patients={patients}
+              currentUser={currentUser}
             />
           )}
 
           {currentTab === 'payments' && (
             <PaymentsView 
               payments={payments}
+              currentUser={currentUser}
               onPayPayment={handlePayPayment}
             />
           )}

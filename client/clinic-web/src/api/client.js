@@ -228,6 +228,25 @@ export const api = {
     return { success: true };
   },
 
+  async completeAppointment(appointmentId) {
+    if (this.getMode() === 'gateway') {
+      try {
+        return await this.request(`/api/appointments/${appointmentId}/complete`, {
+          method: 'POST'
+        });
+      } catch (e) {
+        console.warn('Gateway offline, updating local mock:', e.message);
+      }
+    }
+
+    const list = await this.getAppointments();
+    const updated = list.map(item =>
+      item.id === appointmentId ? { ...item, status: 'COMPLETED' } : item
+    );
+    setStoredData(STORAGE_KEYS.APPOINTMENTS, updated);
+    return { success: true };
+  },
+
   // Doctors
   async getDoctors() {
     if (this.getMode() === 'gateway') {

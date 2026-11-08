@@ -11,16 +11,41 @@ import {
   Sparkles
 } from 'lucide-react';
 
-export default function Sidebar({ currentTab, setCurrentTab, stats }) {
-  const navItems = [
-    { id: 'dashboard', label: 'Tổng quan hệ thống', icon: LayoutDashboard },
-    { id: 'appointments', label: 'Quản lý lịch hẹn', icon: CalendarCheck, badge: stats?.pendingAppointments || null },
-    { id: 'doctors', label: 'Bác sĩ & Lịch làm', icon: UserCheck },
-    { id: 'patients', label: 'Hồ sơ bệnh nhân', icon: Users },
-    { id: 'payments', label: 'Thanh toán viện phí', icon: CreditCard, badge: stats?.pendingPayments || null },
-    { id: 'notifications', label: 'Lịch sử thông báo', icon: Bell },
-    { id: 'system', label: 'Kiến trúc Microservices', icon: Server, highlight: true }
-  ];
+export default function Sidebar({ currentTab, setCurrentTab, stats, currentUser }) {
+  const role = currentUser?.role || 'PATIENT';
+
+  // Customize menu items by role
+  let navItems = [];
+  if (role === 'PATIENT') {
+    navItems = [
+      { id: 'dashboard', label: 'Trang cá nhân', icon: LayoutDashboard },
+      { id: 'appointments', label: 'Lịch khám của tôi', icon: CalendarCheck, badge: stats?.myUpcomingAppointments || null },
+      { id: 'doctors', label: 'Tìm Bác sĩ khám', icon: UserCheck },
+      { id: 'payments', label: 'Viện phí của tôi', icon: CreditCard, badge: stats?.myPendingPayments || null },
+      { id: 'notifications', label: 'Hộp thư thông báo', icon: Bell },
+      { id: 'system', label: 'Kiến trúc Microservices', icon: Server, highlight: true }
+    ];
+  } else if (role === 'DOCTOR') {
+    navItems = [
+      { id: 'dashboard', label: 'Bàn làm việc Bác sĩ', icon: LayoutDashboard },
+      { id: 'appointments', label: 'Ca khám của tôi', icon: CalendarCheck, badge: stats?.doctorPendingAppointments || null },
+      { id: 'patients', label: 'Bệnh nhân điều trị', icon: Users },
+      { id: 'doctors', label: 'Ca trực & Lịch làm', icon: UserCheck },
+      { id: 'notifications', label: 'Thông báo ca trực', icon: Bell },
+      { id: 'system', label: 'Kiến trúc Microservices', icon: Server, highlight: true }
+    ];
+  } else {
+    // ADMIN
+    navItems = [
+      { id: 'dashboard', label: 'Tổng quan toàn viện', icon: LayoutDashboard },
+      { id: 'appointments', label: 'Điều phối lịch hẹn', icon: CalendarCheck, badge: stats?.pendingAppointments || null },
+      { id: 'doctors', label: 'Đội ngũ Bác sĩ', icon: UserCheck },
+      { id: 'patients', label: 'Hồ sơ bệnh nhân', icon: Users },
+      { id: 'payments', label: 'Doanh thu & Viện phí', icon: CreditCard, badge: stats?.pendingPayments || null },
+      { id: 'notifications', label: 'Lịch sử sự kiện RabbitMQ', icon: Bell },
+      { id: 'system', label: 'Kiến trúc Microservices', icon: Server, highlight: true }
+    ];
+  }
 
   return (
     <aside className="sidebar">
