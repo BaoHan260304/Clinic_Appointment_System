@@ -28,20 +28,28 @@
 
 ---
 
-## ⚡ HƯỚNG DẪN 3 BƯỚC ĐỂ TỪNG THÀNH VIÊN TỰ CHẠY MÁY MÌNH
+## ⚡ HƯỚNG DẪN KHỞI ĐỘNG HỆ THỐNG DỄ DÀNG BẰNG FILE SCRIPT (.BAT)
 
-1. **Clone repo:**
+Nhóm đã chuẩn bị sẵn 2 file script tự động hóa 100% tại thư mục gốc:
+
+### Cách 1: Khởi động 1-Click tự động theo đúng thứ tự (Khuyến nghị)
+1. **Clone repo về máy:**
    ```bash
    git clone https://github.com/BaoHan260304/Clinic_Appointment_System.git
    cd Clinic_Appointment_System
    ```
-2. **Bật Database & RabbitMQ:**
-   ```bash
-   docker compose up -d appointment-db doctor-db patient-db user-db payment-db notification-db rabbitmq
-   ```
-3. **Chạy Web UI:**
-   Nhấp đúp file **`START_UI.bat`** tại thư mục gốc để mở `http://localhost:5173`.
-   *(Mỗi người chỉ việc chọn màn hình của mình trên Sidebar và thực hiện các bước demo như bảng trên!)*
+2. **Nhấp đúp chuột vào file `START_SERVICES.bat`** tại thư mục gốc:
+   - Nhập **`1`** và ấn Enter để khởi động **TOÀN BỘ Hệ Thống** theo đúng chuẩn thứ tự:
+     - *Bước 1:* Bật Docker (6 PostgreSQL DBs + RabbitMQ)
+     - *Bước 2:* Config Server (Port 8889)
+     - *Bước 3:* Eureka Discovery Server (Port 8761)
+     - *Bước 4:* 3 Core Services (`user-service:8085`, `doctor-service:8082`, `patient-service:8084`)
+     - *Bước 5:* 3 Business & Event Services (`appointment-service:8081`, `payment-service:8086`, `notification-service:8083`)
+     - *Bước 6:* API Gateway (Port 8080) và Web Frontend (Port 5173).
+3. **Khi cần dừng toàn bộ:** Nhấp đúp file **`STOP_SERVICES.bat`** hoặc chọn `5` trong menu `START_SERVICES.bat`.
+
+### Cách 2: Khởi động giao diện nhanh (Mock/Test nhanh UI)
+- Nhấp đúp file **`START_UI.bat`** để chỉ chạy riêng Frontend Web tại `http://localhost:5173`.
 
 ---
 
