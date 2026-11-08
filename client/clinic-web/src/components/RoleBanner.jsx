@@ -2,6 +2,55 @@ import React from 'react';
 import { UserCheck, ShieldCheck, Stethoscope, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function RoleBanner({ currentUser, onSwitchRole }) {
+  if (!currentUser) {
+    return (
+      <div style={{
+        backgroundColor: '#fffbeb',
+        border: '1px solid #fde68a',
+        borderRadius: '12px',
+        padding: '12px 18px',
+        marginBottom: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '8px',
+            backgroundColor: '#fef3c7',
+            color: '#d97706',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <Sparkles size={20} />
+          </div>
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#92400e' }}>
+              CHẾ ĐỘ KHÁCH (CHƯA ĐĂNG NHẬP)
+            </div>
+            <p style={{ fontSize: '12px', color: '#b45309', margin: '2px 0 0' }}>
+              Bạn đang duyệt thông tin công khai. Hãy chọn 1 vai trò bên phải để đăng nhập nhanh, hoặc bấm nút "Đăng nhập / Đăng ký" trên thanh Header!
+            </p>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="btn btn-primary btn-sm" onClick={() => onSwitchRole('PATIENT')}>
+            Đăng nhập Bệnh nhân
+          </button>
+          <button className="btn btn-secondary btn-sm" onClick={() => onSwitchRole('DOCTOR')}>
+            Đăng nhập Bác sĩ
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const role = currentUser?.role || 'PATIENT';
 
   if (role === 'PATIENT') {

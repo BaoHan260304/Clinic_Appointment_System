@@ -97,10 +97,24 @@ export const api = {
       try {
         const res = await this.request('/auth/login', {
           method: 'POST',
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ usernameOrEmail: email, password })
         });
-        this.setToken(res.accessToken);
-        return res;
+        if (res?.accessToken) {
+          this.setToken(res.accessToken);
+          try {
+            const me = await this.request('/auth/me');
+            const userObj = {
+              userId: me.userId,
+              patientId: me.patientId,
+              name: me.fullName || email.split('@')[0],
+              email: me.email,
+              role: me.roles?.[0] || 'PATIENT'
+            };
+            this.setCurrentUser(userObj);
+            return { success: true, user: userObj };
+          } catch (e) {}
+          return res;
+        }
       } catch (err) {
         console.warn('Gateway error, fallback to mock login:', err.message);
       }
@@ -109,16 +123,39 @@ export const api = {
     // Mock Login
     let role = 'PATIENT';
     let name = 'Đỗ Minh Quân';
+    let userId = 'p2010000-0000-0000-0000-000000000001';
+    let patientId = 'p2010000-0000-0000-0000-000000000001';
+    let doctorId = null;
+
     if (email.includes('doctor') || email.includes('bs.')) {
       role = 'DOCTOR';
       name = 'BS. CKI Nguyễn Văn An';
+      userId = 'd1010000-0000-0000-0000-000000000001';
+      doctorId = 'd1010000-0000-0000-0000-000000000001';
+      patientId = null;
     } else if (email.includes('admin')) {
       role = 'ADMIN';
       name = 'Quản trị viên Hệ thống';
+      userId = 'admin-01';
+      patientId = null;
+    } else {
+      const customUsers = getStoredData('clinic_registered_users', []);
+      const matched = customUsers.find(u => u.email === email);
+      if (matched) {
+        role = matched.role;
+        name = matched.fullName || matched.name;
+        userId = matched.id || matched.userId;
+        patientId = matched.patientId;
+        doctorId = matched.doctorId;
+      } else {
+        name = email.split('@')[0];
+      }
     }
 
     const mockUser = {
-      userId: 'p2010000-0000-0000-0000-000000000001',
+      userId,
+      patientId,
+      doctorId,
       name,
       email,
       role
@@ -126,6 +163,101 @@ export const api = {
     this.setCurrentUser(mockUser);
     this.setToken('mock_jwt_token_' + Date.now());
     return { success: true, user: mockUser };
+  },
+
+  async register(formData) {
+    if (this.getMode() === 'gateway') {
+      try {
+        const res = await this.request('/api/users/register', {
+          method: 'POST',
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            fullName: formData.fullName,
+            phoneNumber: formData.phone || formData.phoneNumber,
+            role: formData.role || 'PATIENT',
+            specialization: formData.specialty,
+            dateOfBirth: formData.dob,
+            gender: formData.gender,
+            contactInformation: formData.address
+          })
+        });
+        if (res) {
+          return await this.login(formData.email, formData.password);
+        }
+      } catch (err) {
+        console.warn('Gateway register error, fallback to mock register:', err.message);
+      }
+    }
+
+    // Mock Register
+    const newId = `u-${Date.now()}`;
+    const isDoc = formData.role === 'DOCTOR';
+    const newUser = {
+      id: newId,
+      userId: newId,
+      patientId: !isDoc ? `p-${Date.now()}` : null,
+      doctorId: isDoc ? `d-${Date.now()}` : null,
+      fullName: formData.fullName,
+      name: formData.fullName,
+      email: formData.email,
+      phone: formData.phone || '0901234567',
+      role: formData.role || 'PATIENT',
+      specialty: formData.specialty || 'Đa Khoa',
+      dob: formData.dob || '2000-01-01',
+      gender: formData.gender || 'Nam',
+      bloodGroup: formData.bloodGroup || 'O+',
+      allergies: formData.allergies || 'Không có',
+      address: formData.address || 'Hà Nội'
+    };
+
+    const registered = getStoredData('clinic_registered_users', []);
+    setStoredData('clinic_registered_users', [...registered, newUser]);
+
+    if (!isDoc) {
+      const pats = await this.getPatients();
+      setStoredData(STORAGE_KEYS.PATIENTS, [
+        {
+          id: newUser.patientId,
+          fullName: newUser.fullName,
+          dob: newUser.dob,
+          gender: newUser.gender,
+          phone: newUser.phone,
+          email: newUser.email,
+          address: newUser.address,
+          bloodGroup: newUser.bloodGroup,
+          allergies: newUser.allergies
+        },
+        ...pats
+      ]);
+    } else {
+      const docs = await this.getDoctors();
+      setStoredData(STORAGE_KEYS.DOCTORS, [
+        {
+          id: newUser.doctorId,
+          fullName: newUser.fullName,
+          specialty: newUser.specialty,
+          phone: newUser.phone,
+          email: newUser.email,
+          rating: 5.0,
+          experienceYears: 1,
+          room: 'Phòng Khám Mới - Tầng 2',
+          availableDays: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'],
+          price: 300000
+        },
+        ...docs
+      ]);
+    }
+
+    this.setCurrentUser(newUser);
+    this.setToken('mock_jwt_token_' + Date.now());
+    return { success: true, user: newUser };
+  },
+
+  logout() {
+    this.setToken(null);
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    return { success: true };
   },
 
   // Appointments

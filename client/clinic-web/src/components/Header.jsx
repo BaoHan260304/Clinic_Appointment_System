@@ -7,7 +7,8 @@ export default function Header({
   setMode, 
   currentUser, 
   setCurrentUser, 
-  onOpenLoginModal 
+  onOpenLoginModal,
+  onLogout
 }) {
   const titles = {
     dashboard: 'Bảng Điều Khiển Tổng Quan',
@@ -117,15 +118,27 @@ export default function Header({
           </div>
         </div>
 
-        {/* Login modal trigger */}
-        <button 
-          className="btn btn-secondary btn-sm" 
-          onClick={onOpenLoginModal}
-          title="Đăng nhập tài khoản"
-        >
-          <LogIn size={14} />
-          <span>Đăng nhập</span>
-        </button>
+        {/* User login / logout action buttons */}
+        {currentUser ? (
+          <button 
+            className="btn btn-secondary btn-sm" 
+            onClick={onLogout}
+            title="Đăng xuất khỏi hệ thống"
+            style={{ color: '#ef4444', borderColor: '#fecaca', backgroundColor: '#fff5f5' }}
+          >
+            <LogOut size={14} />
+            <span>Đăng xuất</span>
+          </button>
+        ) : (
+          <button 
+            className="btn btn-primary btn-sm" 
+            onClick={onOpenLoginModal}
+            title="Đăng nhập hoặc Đăng ký tài khoản mới"
+          >
+            <LogIn size={14} />
+            <span>Đăng nhập / Đăng ký</span>
+          </button>
+        )}
       </div>
     </header>
   );

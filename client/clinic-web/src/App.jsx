@@ -166,10 +166,28 @@ export default function App() {
     setIsNewAppointmentOpen(true);
   };
 
-  const handleLoginSuccess = async (email) => {
-    await api.login(email, 'secret123');
-    setCurrentUserState(api.getCurrentUser());
-    showToast(`Đăng nhập thành công với tài khoản: ${email}`);
+  const handleLoginSuccess = async (email, password) => {
+    const res = await api.login(email, password);
+    if (res?.user) {
+      setCurrentUserState(res.user);
+      await loadAllData();
+      showToast(`Đăng nhập thành công! Xin chào ${res.user.name}`);
+    }
+  };
+
+  const handleRegisterSuccess = async (formData) => {
+    const res = await api.register(formData);
+    if (res?.user) {
+      setCurrentUserState(res.user);
+      await loadAllData();
+      showToast(`Đăng ký tài khoản thành công! Xin chào ${res.user.name}`);
+    }
+  };
+
+  const handleLogout = () => {
+    api.logout();
+    setCurrentUserState(null);
+    showToast('Bạn đã đăng xuất khỏi hệ thống.');
   };
 
   // Pending counts for sidebar badge by role
@@ -240,6 +258,7 @@ export default function App() {
           currentUser={currentUser}
           setCurrentUser={setCurrentUser}
           onOpenLoginModal={() => setIsAuthModalOpen(true)}
+          onLogout={handleLogout}
         />
 
         <main className="content-area">
@@ -344,6 +363,7 @@ export default function App() {
         <AuthModal 
           onClose={() => setIsAuthModalOpen(false)}
           onLoginSuccess={handleLoginSuccess}
+          onRegisterSuccess={handleRegisterSuccess}
         />
       )}
     </div>
