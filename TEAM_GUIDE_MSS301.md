@@ -63,7 +63,8 @@ Hệ thống áp dụng chuẩn kiến trúc **Database per Service**: Mỗi mic
 | :--- | :--- | :---: | :---: | :--- |
 | **Nam** | `user_db` | **`55436`** | `postgres` / `123` | `users`, `roles`, `user_roles`, `refresh_tokens` |
 | **Quân** | `appointment_db` | **`55432`** | `postgres` / `123` | `appointments`, `appointment_status_history` |
-| **Long** | `doctor_db`<br>`patient_db` | **`55433`**<br>**`55435`** | `postgres` / `123`<br>`postgres` / `123` | `doctors`, `slots`, `doctor_schedules`, `doctor_leaves`<br>`patients`, `medical_records` |
+| **Long** | `doctor_db` | **`55433`** | `postgres` / `123` | `doctors`, `slots`, `doctor_schedules`, `doctor_leaves` |
+| **Mười** | `patient_db` | **`55435`** | `postgres` / `123` | `patients`, `medical_records`, `prescriptions` |
 | **Vũ** | `payment_db`<br>`notification_db` | **`55437`**<br>**`55434`** | `postgres` / `123`<br>`postgres` / `123` | `payments`, `invoices`, `transactions`<br>`notifications`, `notification_logs` |
 | **Tất cả** | **RabbitMQ Broker** | **`15672`** (Web)<br>**`5672`** (AMQP) | `guest` / `guest` | Exchange: `clinic.exchange`, Queues: `notification.*` |
 
@@ -86,3 +87,58 @@ Khi thầy cô yêu cầu: *"Mở Database cho tôi xem bảng dữ liệu của
 * **User:** `postgres`
 * **Password:** `123`
 * Bấm **Test Connection** ➔ Báo `Succeeded` ➔ Bấm **OK** để duyệt bảng dữ liệu.
+
+---
+
+## 🎤 HƯỚNG DẪN THUYẾT TRÌNH & DEMO CHI TIẾT CHO THÀNH VIÊN 4: MƯỜI
+
+### 1. Thông Tin Trọng Tâm Phụ Trách:
+* **Màn hình Web:** Tab **"Hồ sơ bệnh nhân"** (`client/clinic-web/src/views/PatientsView.jsx`).
+* **Microservice Backend:** `services/patient-service` (Spring Boot 3.3, chạy ở cổng **8084**).
+* **Database riêng:** `patient_db` (PostgreSQL Host Port **`55435`**, các bảng: `patients`, `medicalrecords`, `prescriptions`).
+* **Khái niệm trọng tâm thuyết minh:** **Bảo mật y tế theo chuẩn HIPAA (Health Insurance Portability and Accountability Act)** & **Phân quyền RBAC (Role-Based Access Control)**.
+
+---
+
+### 2. Kịch Bản & Các Bước Thao Tác Demo Trực Tiếp Trước Giảng Viên:
+
+#### 🔹 Bước 1: Trình diễn ở Quyền Bệnh Nhân (Role: PATIENT)
+1. **Mở Tab "Hồ sơ bệnh nhân"** trên thanh Menu bên trái (đang ở góc nhìn Bệnh nhân - Nguyễn Mạnh Quân).
+2. **Thuyết minh trước Thầy/Cô:**
+   > *"Thưa Thầy/Cô, em là Mười, phụ trách Microservice `patient-service` và phân hệ Quản lý Hồ sơ Sức khỏe Cá nhân & Bệnh án Điện tử. Trong y tế số, tiêu chuẩn bảo mật HIPAA quy định nghiêm ngặt rằng dữ liệu sức khỏe là thông tin nhạy cảm cấp cao, bệnh nhân chỉ được phép xem hồ sơ của chính mình."*
+3. **Chỉ vào thông tin trên màn hình:**
+   * Tên bệnh nhân: **Nguyễn Mạnh Quân** (Mã BN: `p2010000-0000-0000-0000-000000000001`).
+   * Nhóm máu: **O+** (Badge xanh dương y tế).
+   * Cảnh báo tiền sử dị ứng thuốc nghiêm trọng: **Dị ứng Penicillin** (Hệ thống tự động cảnh báo cấm kê kháng sinh Beta-lactam).
+   * Lịch sử khám gần nhất: Viêm họng hạt cấp, đơn thuốc Azithromycin 500mg (thay thế an toàn cho Penicillin).
+4. **Bấm Nút Demo Trực Tiếp:**
+   * Bấm nút **"Thử truy cập hồ sơ bệnh nhân khác (Test HIPAA)"**.
+   * Hệ thống hiển thị Modal cảnh báo màu đỏ: **`403 FORBIDDEN - TRUY CẬP BỊ TỪ CHỐI`**.
+   * Thuyết minh: *"Em bấm nút này để chứng minh `patient-service` đã chặn truy vấn dữ liệu chéo bằng HTTP 403 Forbidden theo chuẩn HIPAA. Bệnh nhân Quân hoàn toàn không thể xem danh bạ hay bệnh án của người khác."*
+
+#### 🔹 Bước 2: Chuyển sang Quyền Bác Sĩ / Admin (Role: DOCTOR / ADMIN)
+1. **Lên Header, bấm chuyển vai trò sang "Bác sĩ" hoặc "Quản trị viên"**.
+2. **Giao diện tự động chuyển đổi:**
+   * Thanh trạng thái hiển thị: `🩺 Chế độ Bác sĩ điều trị / Quản trị viên: Toàn quyền xem danh bạ & bệnh án`.
+   * Hiển thị bảng **Danh sách Hồ sơ Bệnh nhân Toàn viện** gồm các bệnh nhân: Nguyễn Mạnh Quân, Hoàng Mai Linh, Vũ Tuấn Kiệt...
+3. **Thao tác xem bệnh án điện tử:**
+   * Bấm nút **"Xem bệnh án"** tại một bệnh nhân (ví dụ: Hoàng Mai Linh hoặc Nguyễn Mạnh Quân).
+   * Modal **"Hồ Sơ Bệnh Án Điện Tử (EHR)"** mở ra, hiển thị đầy đủ:
+     - Ngày sinh, giới tính, nhóm máu, cảnh báo dị ứng.
+     - Chẩn đoán lâm sàng, huyết áp, nhịp tim, thân nhiệt, SpO2.
+     - Đơn thuốc chỉ định có liều lượng, tần suất và thời gian điều trị.
+     - Bác sĩ phụ trách ký duyệt.
+
+---
+
+### 3. Bộ Câu Hỏi Vấn Đáp Thường Gặp & Cách Trả Lời:
+
+* **Câu hỏi 1: Làm thế nào `patient-service` bảo vệ dữ liệu theo chuẩn HIPAA ở tầng Backend?**
+  * *Trả lời:* Ở Backend `patient-service`, trong `PatientController`, các API nhạy cảm như `GET /api/patients` (lấy danh sách toàn viện) đều được kiểm tra vai trò bằng `requireAnyRole("DOCTOR", "ADMIN")`. Nếu một bệnh nhân gọi vào đây hoặc cố truy cập bệnh án của bệnh nhân khác qua `GET /api/patients/{patientId}/medical-records`, hàm `authorizeRecordRead()` sẽ so khớp ID người dùng trong JWT qua `CurrentUserHolder`. Nếu ID không trùng khớp, service ném `SecurityException` và `GlobalExceptionHandler` trả về HTTP `403 FORBIDDEN`.
+
+* **Câu hỏi 2: Database của em lưu trữ những bảng nào?**
+  * *Trả lời:* Database của em là `patient_db` (Port 55435), gồm 3 bảng chính:
+    1. `patients`: Lưu thông tin định danh bệnh nhân (Họ tên, ngày sinh, giới tính, thông tin liên lạc, nhóm máu, dị ứng).
+    2. `medicalrecords`: Lưu lịch sử khám, chẩn đoán lâm sàng, chỉ số sinh tồn và ghi chú bác sĩ.
+    3. `prescriptions`: Lưu đơn thuốc kê toa (tên thuốc, liều dùng, tần suất, thời gian dùng).
+    Toàn bộ bảng được tự động khởi tạo bằng công cụ **Flyway Migration**.

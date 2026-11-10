@@ -4,6 +4,8 @@ title MediSync Clinic - Microservices Starter (MSS301 - Nhom 09)
 color 0B
 
 set "ROOT_DIR=%~dp0"
+if not defined JAVA_HOME set "JAVA_HOME=D:\JDK21"
+set "PATH=%PATH%;C:\Program Files\maven-mvnd-1.0.2-windows-amd64\mvn\bin;C:\Users\Ta Muoi\AppData\Local\Programs\DockerDesktop\resources\bin"
 
 :menu
 cls
@@ -22,7 +24,11 @@ echo   [0] Thoat
 echo.
 echo ================================================================================
 set "choice="
-set /p choice="Nhap lua chon cua ban [0-6] va an Enter: "
+if not "%1"=="" (
+    set "choice=%1"
+) else (
+    set /p choice="Nhap lua chon cua ban [0-6] va an Enter: "
+)
 
 if "%choice%"=="1" goto :start_all
 if "%choice%"=="2" goto :start_infra
@@ -241,7 +247,7 @@ REM HELPER FUNCTIONS
 REM ================================================================================
 :check_shared_libs
 if not exist "%USERPROFILE%\.m2\repository\com\group09\common-security\1.0-SNAPSHOT" (
-    echo [THONG BAO] Phat hien chua build thu vien shared (common-security, common-events, common-web).
+    echo [THONG BAO] Phat hien chua build thu vien shared: common-security, common-events, common-web
     echo Dang tu dong chay 'mvn install -DskipTests' lan dau de cai vao .m2...
     cd /d "%ROOT_DIR%"
     call mvn install -DskipTests -q

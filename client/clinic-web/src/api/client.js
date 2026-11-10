@@ -103,7 +103,7 @@ export const api = {
       try {
         const res = await this.request('/auth/login', {
           method: 'POST',
-          body: JSON.stringify({ usernameOrEmail: email, password })
+          body: JSON.stringify({ email, username: email, usernameOrEmail: email, password })
         });
         if (res?.accessToken) {
           this.setToken(res.accessToken);

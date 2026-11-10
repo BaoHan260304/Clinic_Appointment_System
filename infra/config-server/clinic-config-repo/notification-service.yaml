@@ -73,6 +73,9 @@ notification:
     mock: ${NOTIFICATION_SENDER_MOCK:true}
 
 management:
+  health:
+    mail:
+      enabled: false
   endpoints:
     web:
       exposure:

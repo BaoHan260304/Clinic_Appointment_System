@@ -81,6 +81,19 @@ public class PatientController {
         return "Patient service running";
     }
 
+    /**
+     * Lấy danh sách toàn bộ hồ sơ bệnh nhân (Yêu cầu quyền DOCTOR hoặc ADMIN - Chuẩn HIPAA).
+     * Bệnh nhân (PATIENT) sẽ bị từ chối truy cập (HTTP 403 FORBIDDEN).
+     */
+    @GetMapping
+    public ResponseEntity<List<PatientResponse>> getAllPatients() {
+        requireAnyRole("DOCTOR", "ADMIN");
+        List<PatientResponse> patients = patientJpaRepository.findAll().stream()
+                .map(PatientResponse::from)
+                .toList();
+        return ResponseEntity.ok(patients);
+    }
+
     @PostMapping
     public ResponseEntity<PatientResponse> createPatient(@Valid @RequestBody CreatePatientRequest request) {
         CreatePatientResult result = createPatientUseCase.execute(new CreatePatientCommand(
