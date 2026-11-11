@@ -142,3 +142,80 @@ Khi thầy cô yêu cầu: *"Mở Database cho tôi xem bảng dữ liệu của
     2. `medicalrecords`: Lưu lịch sử khám, chẩn đoán lâm sàng, chỉ số sinh tồn và ghi chú bác sĩ.
     3. `prescriptions`: Lưu đơn thuốc kê toa (tên thuốc, liều dùng, tần suất, thời gian dùng).
     Toàn bộ bảng được tự động khởi tạo bằng công cụ **Flyway Migration**.
+
+---
+
+## 🎤 HƯỚNG DẪN THUYẾT TRÌNH & DEMO CHI TIẾT CHO THÀNH VIÊN 2: NAM
+
+### 1. Thông Tin Trọng Tâm Phụ Trách:
+* **Màn hình Web:** Hộp thoại **"Tài Khoản & Xác Thực"** (`client/clinic-web/src/components/AuthModal.jsx`).
+* **Microservice Backend:** `services/user-service` (Spring Boot 3.3, chạy ở cổng **8085**) & thư viện dùng chung `shared/common-security`.
+* **Cửa ngõ Gateway phối hợp:** `infra/api-gateway` (Spring Cloud Gateway, cổng **8080**).
+* **Database riêng:** `user_db` (PostgreSQL Host Port **`55436`**, các bảng: `users`, `roles`, `user_roles`, `refresh_tokens`).
+* **Khái niệm trọng tâm thuyết minh:**
+  1. **Gateway Offloading & Context Propagation:** Xác thực chữ ký số JWT tập trung tại API Gateway, giải mã và gắn thông tin người dùng vào Request Headers (`X-User-Id`, `X-User-Roles`, `X-User-Email`) chuyển tiếp cho các service nội bộ.
+  2. **Cơ chế Token Kép (Dual-Token Architecture):** Access Token ngắn hạn (15 phút) Stateless + Refresh Token dài hạn (7 ngày) Stateful lưu trong CSDL.
+  3. **Thu hồi Token (Token Revocation):** Vô hiệu hóa phiên đăng nhập tức thì khi người dùng Đăng xuất bằng cách đánh dấu thu hồi Refresh Token.
+  4. **Bảo mật Mật khẩu (Password Hashing):** Sử dụng thuật toán **BCrypt** với Salt ngẫu nhiên 10 rounds (`$2a$10$...`), kháng hoàn toàn Rainbow Table và Brute-force.
+
+---
+
+### 2. Kịch Bản & 3 Thao Tác Demo Trực Tiếp Trước Giảng Viên:
+
+#### 🔹 Thao Tác 1: Bấm Nút "Đăng Xuất" ➔ Màn Hình Về Chế Độ Khách An Toàn
+1. **Thao tác trên màn hình:**
+   * Khi đang ở trạng thái đăng nhập, di chuột lên góc phải Header và bấm nút **"Đăng xuất"** (hoặc chọn "Đăng xuất" trong dropdown vai trò).
+   * Hệ thống hiển thị thông báo toast: *`Bạn đã đăng xuất khỏi hệ thống.`*
+   * Giao diện ngay lập tức chuyển về **Chế độ Khách (Guest Mode) / Trang Chủ Tổng Quan Phòng Khám**.
+   * Header hiển thị trạng thái `Khách (Chưa đăng nhập)` và nút bấm nổi bật: **"Đăng nhập / Đăng ký"**.
+2. **Thuyết minh trước Thầy/Cô:**
+   > *"Thưa Thầy/Cô, em là Nam, phụ trách phân hệ Xác thực, Bảo mật và User Service (Port 8085). Thao tác đầu tiên em thực hiện là bấm Đăng xuất. Lúc này, Access Token trong trình duyệt bị xóa, đồng thời hệ thống gửi yêu cầu thu hồi Refresh Token tại `user_db`. Màn hình lập tức đưa về Chế độ Khách an toàn, ẩn toàn bộ thông tin nhạy cảm của bệnh nhân hay bác sĩ, chỉ hiển thị thông tin giới thiệu công khai của phòng khám."*
+
+#### 🔹 Thao Tác 2: Mở Tab "Đăng Ký Tài Khoản" ➔ Đăng Ký Bệnh Nhân Mới Hoặc Bác Sĩ Mới
+1. **Thao tác trên màn hình:**
+   * Bấm nút **"Đăng nhập / Đăng ký"** trên góc phải Header.
+   * Chuyển sang tab **"Đăng Ký Tài Khoản"**.
+   * **Trình diễn đăng ký Bệnh nhân mới:**
+     - Bấm nút **`⚡ Mẫu Bệnh nhân (Nhóm máu A+)`** (hoặc nhập tay Họ tên: *Trần Bảo Nam*, Email: *nam.patient@example.com*, Mật khẩu: *secret123*).
+     - Chỉ vào trường chuyên biệt của Bệnh nhân: **Nhóm máu A+**, **Tiền sử dị ứng: Dị ứng Penicillin & Phấn hoa**.
+   * **(Hoặc) Trình diễn đăng ký Bác sĩ mới:**
+     - Bấm chọn vai trò **"Bác Sĩ Khám"** hoặc bấm nút **`⚡ Mẫu Bác sĩ (Tim Mạch)`**.
+     - Nhập thông tin bác sĩ và chọn chuyên khoa phụ trách: **Tim Mạch**.
+   * Bấm nút **"Tạo Tài Khoản & Đăng Nhập"**.
+   * Hệ thống thông báo thành công và tự động đăng nhập vào tài khoản vừa tạo.
+2. **Thuyết minh trước Thầy/Cô:**
+   > *"Tại tab Đăng ký, hệ thống hỗ trợ 2 luồng nghiệp vụ riêng biệt: Bệnh nhân đăng ký kèm nhóm máu và tiền sử dị ứng; Bác sĩ đăng ký kèm chuyên khoa lâm sàng. Khi bấm tạo tài khoản, `user-service` sẽ băm mật khẩu bằng BCrypt, lưu vào bảng `users` trong `user_db` (Port 55436), đồng thời sử dụng `ProfileProvisioningRestClient` đồng bộ tự động sang `patient-service` hoặc `doctor-service` theo kiến trúc Microservices."*
+
+#### 🔹 Thao Tác 3: Mở Tab "Đăng Nhập" ➔ Demo 1-Click / Form & Thuyết Minh JWT, Refresh Token & BCrypt
+1. **Thao tác trên màn hình:**
+   * Bấm mở hộp thoại **"Tài Khoản & Xác Thực"**, ở tab **"Đăng Nhập"**.
+   * Demo đăng nhập nhanh 1-Click: Chọn tài khoản Bệnh nhân (*quan.patient@example.com*), Bác sĩ (*bs.an@clinic.local*), hoặc Admin.
+   * Bấm mở khối **"Cơ Chế Bảo Mật: JWT Token & BCrypt (Nam thuyết minh)"** ngay bên dưới form.
+2. **Thuyết minh trước Thầy/Cô:**
+   > *"Về mặt kiến trúc bảo mật tầng sâu, phân hệ của em đảm bảo 3 nguyên tắc sống còn:
+   > 1. **Mật khẩu người dùng:** Không bao giờ lưu văn bản thuần (plain text). Em dùng `BCryptPasswordEncoder` với hệ số Salt 10 rounds sinh chuỗi hash `$2a$10$...`. Mỗi lần hash đều có salt ngẫu nhiên nên hoàn toàn vô hiệu hóa kỹ thuật Rainbow Table.
+   > 2. **JWT Access Token:** Có thời hạn ngắn 15 phút, chứa định danh `userId` và danh sách quyền `roles`, được ký số HMAC-SHA256. Để giảm tải cho hệ thống, nhóm áp dụng kỹ thuật **Gateway Offloading**: API Gateway xác thực token một lần duy nhất tại cửa ngõ, sau đó bóc tách thành headers `X-User-Id`, `X-User-Roles` gửi cho các microservices bên trong.
+   > 3. **Refresh Token & Thu hồi:** Có thời hạn 7 ngày, lưu trữ trong bảng `refresh_tokens` tại PostgreSQL `user_db` (Port 55436). Khi người dùng bấm Đăng xuất, token này bị thu hồi (Revoke) ngay lập tức, ngăn ngừa hoàn toàn nguy cơ Replay Attack."*
+
+---
+
+### 3. Bộ Câu Hỏi Vấn Đáp Thường Gặp Cho Nam & Cách Trả Lời Điểm Tối Đa:
+
+* **Câu hỏi 1: Tại sao nhóm lại dùng mô hình 2 Token (Access Token 15 phút và Refresh Token 7 ngày) thay vì dùng 1 token dài hạn?**
+  * *Trả lời:* Access Token là **Stateless**, mỗi request gửi lên Gateway được kiểm tra bằng chữ ký số trong bộ nhớ RAM mà không cần truy vấn Database, giúp hệ thống đạt hiệu năng cao và độ trễ cực thấp. Tuy nhiên, vì Stateless nên ta không thể thu hồi (revoke) nó trước khi nó tự hết hạn. Do đó, nhóm giới hạn Access Token chỉ sống **15 phút** để giảm thiểu thiệt hại nếu bị lộ. Ngược lại, Refresh Token sống **7 ngày** nhưng là **Stateful** (được lưu trong CSDL `user_db`). Khi Access Token hết hạn, client gửi Refresh Token về `POST /auth/refresh` để xin cấp cặp token mới. Nếu tài khoản bị xâm nhập hoặc người dùng bấm Đăng xuất, ta chỉ cần cập nhật cột `revoked_at` của Refresh Token trong Database là vô hiệu hóa phiên ngay lập tức.
+
+* **Câu hỏi 2: API Gateway và các Microservices nội bộ phối hợp xác thực như thế nào (Gateway Offloading)?**
+  * *Trả lời:* Khi client gửi request kèm `Authorization: Bearer <JWT>`, bộ lọc `JwtUserHeaderGatewayFilter` tại API Gateway (Port 8080) sẽ kiểm tra chữ ký số HMAC-SHA256. Nếu hợp lệ, Gateway trích xuất `userId`, `email`, `roles` từ payload JWT rồi gắn vào Request Headers nội bộ (`X-User-Id`, `X-User-Roles`, `X-User-Email`) trước khi định tuyến tới service đích (ví dụ `appointment-service`). Các service bên trong chỉ cần tích hợp thư viện `shared/common-security`, lớp `CurrentUserHeaderFilter` sẽ tự động đọc các Header này và nạp vào ThreadLocal thông qua `CurrentUserHolder`. Nhờ đó, các service nội bộ không phải giải mã JWT lặp đi lặp lại, tiết kiệm tài nguyên CPU đáng kể.
+
+* **Câu hỏi 3: Tại sao lại chọn BCrypt để mã hóa mật khẩu thay vì SHA-256 hay MD5?**
+  * *Trả lời:* Các hàm băm như MD5 hay SHA-256 được thiết kế để tính toán rất nhanh (cho việc kiểm tra toàn vẹn file), nên máy tính hiện đại có thể thử hàng tỷ hash mỗi giây (bị bẻ khóa bằng GPU hoặc Rainbow Table). Ngược lại, **BCrypt** là thuật toán băm chậm thích ứng (Adaptive Slow-Hashing Algorithm), tự động sinh một chuỗi **Salt 128-bit** ngẫu nhiên gắn kèm vào hash và cho phép cấu hình Work Factor (nhóm em dùng cost 10, tức $2^{10} = 1024$ vòng lặp băm). Điều này làm cho việc dò mật khẩu bằng Brute-Force hoặc Rainbow Table trở nên bất khả thi về mặt thời gian và kinh tế.
+
+* **Câu hỏi 4: Database `user_db` của em gồm những bảng nào và quan hệ giữa chúng ra sao?**
+  * *Trả lời:* Database `user_db` (PostgreSQL Port **55436**) gồm 4 bảng được thiết kế chuẩn hóa 3NF và tự động quản lý bởi Flyway:
+    1. `users`: Khóa chính `id (UUID)`, lưu `email`, `full_name`, `phone_number`, `password_hash`, `status`.
+    2. `roles`: Khóa chính `id (UUID)`, lưu tên vai trò định danh (`ADMIN`, `DOCTOR`, `PATIENT`).
+    3. `user_roles`: Bảng liên kết trung gian biểu diễn quan hệ nhiều - nhiều (N:N) giữa `users` và `roles`.
+    4. `refresh_tokens`: Khóa chính `id (UUID)`, khóa ngoại liên kết tới `users(id)`, lưu `token_hash`, thời hạn `expires_at`, và mốc thu hồi `revoked_at`.
+
+* **Câu hỏi 5: Khi một người dùng mới đăng ký trên màn hình của em, làm sao các service khác như Doctor hay Patient biết được thông tin đó?**
+  * *Trả lời:* Trong `user-service`, sau khi `RegisterUseCase` tạo thành công bản ghi User và băm mật khẩu trong `user_db`, hệ thống sử dụng `ProfileProvisioningRestClient` (giao tiếp HTTP đồng bộ nội bộ) để gọi sang `patient-service` (`POST /api/patients`) nếu role là `PATIENT` (kèm nhóm máu, dị ứng), hoặc gọi sang `doctor-service` (`POST /api/doctors`) nếu role là `DOCTOR` (kèm chuyên khoa). Việc tách rời này đảm bảo nguyên lý **Database per Service** - mỗi service chỉ sở hữu và toàn quyền quản lý dữ liệu nghiệp vụ của riêng mình.

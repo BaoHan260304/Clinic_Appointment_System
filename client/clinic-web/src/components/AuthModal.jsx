@@ -1,9 +1,30 @@
 import React, { useState } from 'react';
-import { User, Lock, LogIn, UserPlus, Sparkles, Stethoscope, Heart, Phone, Mail, Calendar, Key, ArrowLeft, CheckCircle2, Send } from 'lucide-react';
+import { 
+  User, 
+  Lock, 
+  LogIn, 
+  UserPlus, 
+  Sparkles, 
+  Stethoscope, 
+  Heart, 
+  Phone, 
+  Mail, 
+  Calendar, 
+  Key, 
+  ArrowLeft, 
+  CheckCircle2, 
+  Send,
+  ShieldCheck,
+  ChevronDown,
+  ChevronUp,
+  Database,
+  Info
+} from 'lucide-react';
 import { api } from '../api/client';
 
 export default function AuthModal({ onClose, onLoginSuccess, onRegisterSuccess }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' or 'register'
+  const [showSecurityDetails, setShowSecurityDetails] = useState(false);
   
   // Login form state
   const [loginEmail, setLoginEmail] = useState('quan.patient@example.com');
@@ -83,6 +104,30 @@ export default function AuthModal({ onClose, onLoginSuccess, onRegisterSuccess }
   const [regAllergies, setRegAllergies] = useState('Không có');
   const [regSpecialty, setRegSpecialty] = useState('Nội Tổng Quát');
 
+  const handleQuickFillPatient = () => {
+    setRegRole('PATIENT');
+    setRegFullName('Trần Bảo Nam');
+    setRegEmail(`nam.patient${Math.floor(100 + Math.random() * 900)}@example.com`);
+    setRegPhone('0988776655');
+    setRegPassword('secret123');
+    setRegDob('2000-05-15');
+    setRegGender('Nam');
+    setRegBloodGroup('A+');
+    setRegAllergies('Dị ứng Penicillin & Phấn hoa');
+    setErrorMessage(null);
+  };
+
+  const handleQuickFillDoctor = () => {
+    setRegRole('DOCTOR');
+    setRegFullName('BS. CKI Lê Hoàng Nam');
+    setRegEmail(`bs.nam${Math.floor(100 + Math.random() * 900)}@clinic.local`);
+    setRegPhone('0977889900');
+    setRegPassword('secret123');
+    setRegGender('Nam');
+    setRegSpecialty('Tim Mạch');
+    setErrorMessage(null);
+  };
+
   const handleLoginSubmit = async (customEmail, customPass) => {
     setLoading(true);
     setErrorMessage(null);
@@ -138,8 +183,15 @@ export default function AuthModal({ onClose, onLoginSuccess, onRegisterSuccess }
         {/* Header with Close */}
         <div className="modal-header" style={{ marginBottom: '16px' }}>
           <div>
-            <h3 style={{ fontSize: '18px', fontWeight: 800 }}>Tài Khoản & Xác Thực</h3>
-            <p style={{ fontSize: '12px', color: '#64748b' }}>Hệ thống Quản lý Người dùng (User Service & JWT)</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, margin: 0 }}>Tài Khoản & Xác Thực</h3>
+              <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px', backgroundColor: '#e0f2fe', color: '#0284c7', border: '1px solid #bae6fd' }}>
+                Phân hệ: Nam (MSS301)
+              </span>
+            </div>
+            <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
+              Microservice Backend: <strong>user-service (8085)</strong> • CSDL: <strong>user_db (55436)</strong>
+            </p>
           </div>
           <button className="btn btn-secondary btn-sm" onClick={onClose}>✕</button>
         </div>
@@ -267,12 +319,119 @@ export default function AuthModal({ onClose, onLoginSuccess, onRegisterSuccess }
                 <span>{loading ? 'Đang xác thực...' : 'Đăng Nhập Ngay'}</span>
               </button>
             </form>
+
+            {/* Interactive Security Architecture Box (JWT & BCrypt Demo for Nam) */}
+            <div style={{
+              marginTop: '16px',
+              borderRadius: '10px',
+              border: '1px solid #cbd5e1',
+              backgroundColor: '#f8fafc',
+              overflow: 'hidden'
+            }}>
+              <button
+                type="button"
+                onClick={() => setShowSecurityDetails(!showSecurityDetails)}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  background: 'none',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  color: '#334155'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ShieldCheck size={16} color="#0d9488" />
+                  <span>Cơ Chế Bảo Mật: JWT Token & BCrypt (Nam thuyết minh)</span>
+                </div>
+                {showSecurityDetails ? <ChevronUp size={16} color="#64748b" /> : <ChevronDown size={16} color="#64748b" />}
+              </button>
+
+              {showSecurityDetails && (
+                <div style={{ padding: '12px 14px', borderTop: '1px solid #e2e8f0', fontSize: '11px', color: '#475569', lineHeight: 1.6, backgroundColor: '#ffffff' }}>
+                  {/* BCrypt Card */}
+                  <div style={{ marginBottom: '10px', padding: '8px 10px', backgroundColor: '#f1f5f9', borderRadius: '6px' }}>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>🔐 1. Mật Khẩu Mã Hóa BCrypt (Salt 10 Rounds)</span>
+                    </div>
+                    <div>
+                      Mật khẩu gốc <code>secret123</code> được băm tự động bằng <strong>BCryptPasswordEncoder</strong> thành chuỗi hash:
+                      <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#b91c1c', backgroundColor: '#fff', padding: '4px 6px', borderRadius: '4px', marginTop: '4px', border: '1px solid #e2e8f0', wordBreak: 'break-all' }}>
+                        $2a$10$wT0K7Vz8J8W3H7G5jF.k7.a9gK3X8qY4pZ6w1t.e0v5b8mX9pQ12
+                      </div>
+                      <span style={{ fontSize: '10px', color: '#64748b', display: 'block', marginTop: '2px' }}>
+                        * Mỗi lần băm sinh một chuỗi Salt ngẫu nhiên khác nhau, bảo vệ 100% trước tấn công Rainbow Table và Brute-force.
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* JWT & Gateway Offloading */}
+                  <div style={{ marginBottom: '10px', padding: '8px 10px', backgroundColor: '#f0fdfa', borderRadius: '6px', border: '1px solid #ccfbf1' }}>
+                    <div style={{ fontWeight: 700, color: '#0f766e', marginBottom: '2px' }}>
+                      <span>🎫 2. JWT Access Token (15 Phút) & Gateway Offloading</span>
+                    </div>
+                    <div>
+                      API Gateway (Port 8080) giải mã chữ ký HMAC-SHA256, chuyển ngữ cảnh an toàn qua Request Headers cho microservices:
+                      <div style={{ fontFamily: 'monospace', fontSize: '10px', color: '#0d9488', backgroundColor: '#fff', padding: '4px 6px', borderRadius: '4px', marginTop: '4px', border: '1px solid #ccfbf1' }}>
+                        X-User-Id: p2010000-0000-0000-0000-000000000001<br/>
+                        X-User-Roles: ROLE_PATIENT<br/>
+                        X-User-Email: quan.patient@example.com
+                      </div>
+                      <span style={{ fontSize: '10px', color: '#0f766e', display: 'block', marginTop: '2px' }}>
+                        * Microservices bên trong sử dụng thư viện <code>shared/common-security</code> để đọc thông tin định danh tức thì.
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Refresh Token & Revocation */}
+                  <div style={{ padding: '8px 10px', backgroundColor: '#eff6ff', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
+                    <div style={{ fontWeight: 700, color: '#1e40af', marginBottom: '2px' }}>
+                      <span>🔄 3. Refresh Token (7 Ngày) & Thu Hồi Khi Đăng Xuất</span>
+                    </div>
+                    <div>
+                      Lưu trữ trong bảng <code>refresh_tokens</code> tại PostgreSQL <strong>user_db (Port 55436)</strong>. Khi người dùng bấm <strong>"Đăng xuất"</strong>, token bị đánh dấu thu hồi (Revoke) ngay lập tức nhằm ngăn chặn kẻ xấu chiếm đoạt phiên.
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* ===================== TAB 2: REGISTER ===================== */}
         {activeTab === 'register' && (
           <form onSubmit={handleRegisterSubmit}>
+            {/* Quick Demo Fill Presets for Nam */}
+            <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #ccfbf1', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 700, color: '#0f766e', marginBottom: '8px' }}>
+                <Sparkles size={14} />
+                <span>Điền nhanh mẫu đăng ký (Dành cho Nam Demo):</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '11px', fontWeight: 600, background: 'white', justifyContent: 'center' }}
+                  onClick={handleQuickFillPatient}
+                >
+                  ⚡ Mẫu Bệnh nhân (Nhóm máu A+)
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  style={{ fontSize: '11px', fontWeight: 600, background: 'white', justifyContent: 'center' }}
+                  onClick={handleQuickFillDoctor}
+                >
+                  ⚡ Mẫu Bác sĩ (Tim Mạch)
+                </button>
+              </div>
+            </div>
+
             {/* Role picker */}
             <div className="form-group">
               <label className="form-label">Bạn muốn đăng ký tài khoản với tư cách gì?</label>
@@ -417,6 +576,9 @@ export default function AuthModal({ onClose, onLoginSuccess, onRegisterSuccess }
                       <option value="B+">B+</option>
                       <option value="AB+">AB+</option>
                       <option value="O-">O-</option>
+                      <option value="A-">A-</option>
+                      <option value="B-">B-</option>
+                      <option value="AB-">AB-</option>
                     </select>
                   </div>
                 </div>
@@ -470,6 +632,13 @@ export default function AuthModal({ onClose, onLoginSuccess, onRegisterSuccess }
               <UserPlus size={16} />
               <span>{loading ? 'Đang tạo tài khoản...' : 'Tạo Tài Khoản & Đăng Nhập'}</span>
             </button>
+
+            <div style={{ marginTop: '12px', padding: '8px 12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Database size={14} color="#0d9488" style={{ flexShrink: 0 }} />
+              <span>
+                Dữ liệu được lưu vào <strong>user_db (Port 55436)</strong> với mật khẩu băm BCrypt, đồng thời tự động đồng bộ sang hồ sơ y tế tại <strong>patient-service (8084)</strong> hoặc <strong>doctor-service (8082)</strong>.
+              </span>
+            </div>
           </form>
         )}
 
