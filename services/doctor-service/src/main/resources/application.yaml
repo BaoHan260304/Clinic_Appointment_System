@@ -1,8 +1,0 @@
-server:
-  port: ${SERVER_PORT:8082}
-
-spring:
-  application:
-    name: doctor-service
-  config:
-    import: optional:configserver:${SPRING_CLOUD_CONFIG_URI:http://localhost:8889}
