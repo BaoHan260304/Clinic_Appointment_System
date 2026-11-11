@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { User, Lock, LogIn, UserPlus, Sparkles, Stethoscope, Heart, Phone, Mail, Calendar } from 'lucide-react';
+import { User, Lock, LogIn, UserPlus, Sparkles, Stethoscope, Heart, Phone, Mail, Calendar, Key, ArrowLeft, CheckCircle2, Send } from 'lucide-react';
+import { api } from '../api/client';
 
 export default function AuthModal({ onClose, onLoginSuccess, onRegisterSuccess }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' or 'register'
@@ -9,6 +10,66 @@ export default function AuthModal({ onClose, onLoginSuccess, onRegisterSuccess }
   const [loginPassword, setLoginPassword] = useState('secret123');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  // Forgot password form state
+  const [forgotEmail, setForgotEmail] = useState('quan.patient@example.com');
+  const [forgotOtp, setForgotOtp] = useState('');
+  const [forgotNewPass, setForgotNewPass] = useState('');
+  const [forgotConfirmPass, setForgotConfirmPass] = useState('');
+  const [forgotStep, setForgotStep] = useState(1); // 1: input email, 2: input otp & new pass
+
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    try {
+      const res = await api.forgotPassword(forgotEmail);
+      setLoading(false);
+      setForgotOtp('888666'); // preset demo
+      setForgotStep(2);
+      setSuccessMessage('Mã OTP xác thực đã được gửi về email qua RabbitMQ! Mã thử nghiệm: 888666');
+    } catch (err) {
+      setLoading(false);
+      setErrorMessage(err.message || 'Không thể gửi mã OTP');
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!forgotOtp) {
+      setErrorMessage('Vui lòng nhập mã OTP xác thực');
+      return;
+    }
+    if (forgotNewPass.length < 6) {
+      setErrorMessage('Mật khẩu mới phải có ít nhất 6 ký tự');
+      return;
+    }
+    if (forgotNewPass !== forgotConfirmPass) {
+      setErrorMessage('Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    try {
+      await api.resetPassword(forgotEmail, forgotOtp, forgotNewPass);
+      setLoading(false);
+      setSuccessMessage('🎉 Đặt lại mật khẩu thành công! Đang chuyển về màn hình đăng nhập...');
+      setLoginEmail(forgotEmail);
+      setLoginPassword(forgotNewPass);
+      setTimeout(() => {
+        setActiveTab('login');
+        setForgotStep(1);
+        setSuccessMessage(null);
+      }, 1500);
+    } catch (err) {
+      setLoading(false);
+      setErrorMessage(err.message || 'Đặt lại mật khẩu thất bại');
+    }
+  };
 
   // Register form state
   const [regFullName, setRegFullName] = useState('');
@@ -111,6 +172,13 @@ export default function AuthModal({ onClose, onLoginSuccess, onRegisterSuccess }
           </div>
         )}
 
+        {successMessage && (
+          <div style={{ padding: '10px 14px', backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', borderRadius: '8px', fontSize: '13px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CheckCircle2 size={16} />
+            <span>{successMessage}</span>
+          </div>
+        )}
+
         {/* ===================== TAB 1: LOGIN ===================== */}
         {activeTab === 'login' && (
           <div>
@@ -166,7 +234,16 @@ export default function AuthModal({ onClose, onLoginSuccess, onRegisterSuccess }
               </div>
 
               <div className="form-group">
-                <label className="form-label">Mật khẩu</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label className="form-label" style={{ margin: 0 }}>Mật khẩu</label>
+                  <button 
+                    type="button" 
+                    onClick={() => { setActiveTab('forgot'); setErrorMessage(null); setSuccessMessage(null); setForgotStep(1); }}
+                    style={{ background: 'none', border: 'none', color: '#0d9488', fontSize: '12px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                  >
+                    Quên mật khẩu?
+                  </button>
+                </div>
                 <div style={{ position: 'relative' }}>
                   <Lock size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '11px' }} />
                   <input 
@@ -394,6 +471,138 @@ export default function AuthModal({ onClose, onLoginSuccess, onRegisterSuccess }
               <span>{loading ? 'Đang tạo tài khoản...' : 'Tạo Tài Khoản & Đăng Nhập'}</span>
             </button>
           </form>
+        )}
+
+
+        {/* ===================== TAB 3: FORGOT PASSWORD ===================== */}
+        {activeTab === 'forgot' && (
+          <div>
+            <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #ccfbf1', padding: '14px', borderRadius: '12px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 700, color: '#0f766e', marginBottom: '4px' }}>
+                <Key size={16} />
+                <span>Khôi Phục Mật Khẩu Qua Email (RabbitMQ)</span>
+              </div>
+              <p style={{ fontSize: '12px', color: '#115e59', margin: 0, lineHeight: 1.5 }}>
+                Nhập email đã đăng ký. Hệ thống sẽ phát sinh sự kiện OTP qua <strong>RabbitMQ</strong> và <strong>Notification Service</strong> sẽ gửi mã xác nhận đến hòm thư của bạn.
+              </p>
+            </div>
+
+            {forgotStep === 1 ? (
+              <form onSubmit={handleSendOtp}>
+                <div className="form-group">
+                  <label className="form-label">Email tài khoản cần khôi phục</label>
+                  <div style={{ position: 'relative' }}>
+                    <Mail size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '11px' }} />
+                    <input 
+                      type="email" 
+                      className="form-input" 
+                      style={{ paddingLeft: '36px' }}
+                      value={forgotEmail}
+                      onChange={e => setForgotEmail(e.target.value)}
+                      placeholder="ví dụ: quan.patient@example.com"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="btn btn-primary" 
+                  style={{ width: '100%', padding: '11px', marginTop: '10px', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                  disabled={loading}
+                >
+                  <Send size={16} />
+                  <span>{loading ? 'Đang gửi mã qua RabbitMQ...' : 'Gửi Mã Xác Thực OTP'}</span>
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleResetPassword}>
+                <div className="form-group">
+                  <label className="form-label">Email</label>
+                  <input 
+                    type="email" 
+                    className="form-input" 
+                    value={forgotEmail}
+                    disabled
+                    style={{ backgroundColor: '#f8fafc', color: '#64748b' }}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label className="form-label" style={{ margin: 0 }}>Mã xác thực OTP (6 chữ số)</label>
+                    <span style={{ fontSize: '11px', color: '#0d9488', fontWeight: 600 }}>Thử nghiệm: 888666</span>
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <Key size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '11px' }} />
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      style={{ paddingLeft: '36px', letterSpacing: '2px', fontWeight: 700 }}
+                      value={forgotOtp}
+                      onChange={e => setForgotOtp(e.target.value)}
+                      placeholder="888666"
+                      maxLength={6}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Mật khẩu mới</label>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '11px' }} />
+                    <input 
+                      type="password" 
+                      className="form-input" 
+                      style={{ paddingLeft: '36px' }}
+                      value={forgotNewPass}
+                      onChange={e => setForgotNewPass(e.target.value)}
+                      placeholder="Tối thiểu 6 ký tự"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Xác nhận mật khẩu mới</label>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '11px' }} />
+                    <input 
+                      type="password" 
+                      className="form-input" 
+                      style={{ paddingLeft: '36px' }}
+                      value={forgotConfirmPass}
+                      onChange={e => setForgotConfirmPass(e.target.value)}
+                      placeholder="Nhập lại mật khẩu mới"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="btn btn-primary" 
+                  style={{ width: '100%', padding: '11px', marginTop: '10px', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                  disabled={loading}
+                >
+                  <CheckCircle2 size={16} />
+                  <span>{loading ? 'Đang cập nhật mật khẩu...' : 'Xác Nhận Đổi Mật Khẩu'}</span>
+                </button>
+              </form>
+            )}
+
+            <div style={{ marginTop: '16px', textAlign: 'center' }}>
+              <button 
+                type="button" 
+                onClick={() => { setActiveTab('login'); setErrorMessage(null); setSuccessMessage(null); setForgotStep(1); }}
+                style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '13px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                <ArrowLeft size={14} />
+                <span>Quay lại Đăng nhập</span>
+              </button>
+            </div>
+          </div>
         )}
 
       </div>

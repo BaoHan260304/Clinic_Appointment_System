@@ -142,14 +142,14 @@ curl -X POST http://localhost:8083/api/v1/internal/emails/send \
 - services/notification-service/docs/EMAIL-MVP-INDEX.md
 
 **Source Code:**
-- services/notification-service/src/main/java/com/group09/notification/domain/vo/EmailType.java
-- services/notification-service/src/main/java/com/group09/notification/application/usecase/SendEmailUseCase.java
-- services/notification-service/src/main/java/com/group09/notification/application/usecase/impl/SendEmailUseCaseImpl.java
-- services/notification-service/src/main/java/com/group09/notification/infrastructure/sender/EmailTemplateRenderer.java
-- services/notification-service/src/main/java/com/group09/notification/infrastructure/sender/EmailSenderService.java
-- services/notification-service/src/main/java/com/group09/notification/api/controller/EmailController.java
-- services/notification-service/src/main/java/com/group09/notification/api/dto/SendEmailRequest.java
-- services/notification-service/src/main/java/com/group09/notification/api/dto/SendEmailResponse.java
+- services/notification-service/src/main/java/com/group05/notification/domain/vo/EmailType.java
+- services/notification-service/src/main/java/com/group05/notification/application/usecase/SendEmailUseCase.java
+- services/notification-service/src/main/java/com/group05/notification/application/usecase/impl/SendEmailUseCaseImpl.java
+- services/notification-service/src/main/java/com/group05/notification/infrastructure/sender/EmailTemplateRenderer.java
+- services/notification-service/src/main/java/com/group05/notification/infrastructure/sender/EmailSenderService.java
+- services/notification-service/src/main/java/com/group05/notification/api/controller/EmailController.java
+- services/notification-service/src/main/java/com/group05/notification/api/dto/SendEmailRequest.java
+- services/notification-service/src/main/java/com/group05/notification/api/dto/SendEmailResponse.java
 
 **Database:**
 - services/notification-service/src/main/resources/db/migration/V3__add_email_templates.sql

@@ -1,6 +1,6 @@
 # HƯỚNG DẪN XEM & XUẤT SƠ ĐỒ HỆ THỐNG TRÊN DRAW.IO (MSS301)
 > **Tên hệ thống chính thức:** **Hệ Thống Phòng Khám Đa Khoa MediSync (MediSync Clinic System)**  
-> **Môn học:** MSS301 - Microservices Architecture (Nhóm 09)  
+> **Môn học:** MSS301 - Microservices Architecture (Nhóm 05)  
 > **File sơ đồ gốc Draw.io:** [`SYSTEM_ARCHITECTURE.drawio`](./SYSTEM_ARCHITECTURE.drawio)
 
 ---
@@ -124,8 +124,8 @@ sequenceDiagram
 ## 🏷️ 3. TÊN HỆ THỐNG ĐÃ ĐƯỢC CHUẨN HÓA
 
 * **Tên cũ trước đây:** `clinic-appointment-system` (hoặc `group01`, tên tác giả cũ).
-* **Tên chính thức mới:** **MediSync Clinic** *(Hệ Thống Phòng Khám Đa Khoa MediSync - MSS301 Nhóm 09)*.
+* **Tên chính thức mới:** **MediSync Clinic** *(Hệ Thống Phòng Khám Đa Khoa MediSync - MSS301 Nhóm 05)*.
 * Tất cả tên package, groupId trong `pom.xml`, logo thương hiệu, giao diện web và tài liệu hướng dẫn đã được đổi đồng bộ 100% sang:
   - **Tên dự án:** `MediSync Clinic System`
-  - **Package Java:** `com.group09`
-  - **Nhóm thực hiện:** Nhóm 09 môn MSS301
+  - **Package Java:** `com.group05`
+  - **Nhóm thực hiện:** Nhóm 05 môn MSS301

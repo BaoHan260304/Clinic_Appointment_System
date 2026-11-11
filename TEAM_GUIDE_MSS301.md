@@ -1,4 +1,4 @@
-# PHÂN CHIA MÀN HÌNH & CHỨC NĂNG DEMO NHÓM 09 (MSS301)
+# PHÂN CHIA MÀN HÌNH & CHỨC NĂNG DEMO NHÓM 05 (MSS301)
 > **Môn học:** MSS301 - Microservices Architecture  
 > **Dự án:** Hệ thống Quản lý Đặt lịch Khám bệnh MediSync Clinic  
 > **Nguyên tắc phân chia:** **Mỗi thành viên sở hữu 1 Màn hình giao diện (UI) + 1 Microservice Backend + Database tương ứng** để trực tiếp thao tác demo trước hội đồng chấm thi!

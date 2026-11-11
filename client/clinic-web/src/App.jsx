@@ -56,6 +56,10 @@ export default function App() {
   };
 
   const handleRoleSwitch = (role) => {
+    if (role === 'GUEST') {
+      handleLogout();
+      return;
+    }
     const profiles = {
       PATIENT: {
         userId: 'p2010000-0000-0000-0000-000000000001',
@@ -162,6 +166,11 @@ export default function App() {
   };
 
   const handleBookWithDoctor = (doctor) => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      showToast('Vui lòng đăng nhập hoặc chọn vai trò Bệnh nhân để đặt lịch khám!', 'error');
+      return;
+    }
     setSelectedDoctorForBooking(doctor);
     setIsNewAppointmentOpen(true);
   };
@@ -279,10 +288,17 @@ export default function App() {
               payments={payments}
               currentUser={currentUser}
               onNewAppointmentClick={() => {
-                setSelectedDoctorForBooking(null);
-                setIsNewAppointmentOpen(true);
+                if (!currentUser) {
+                  setIsAuthModalOpen(true);
+                  showToast('Vui lòng đăng nhập hoặc chọn vai trò Bệnh nhân để đặt lịch khám!', 'error');
+                } else {
+                  setSelectedDoctorForBooking(null);
+                  setIsNewAppointmentOpen(true);
+                }
               }}
               onNavigateTab={setCurrentTab}
+              onOpenLoginModal={() => setIsAuthModalOpen(true)}
+              onQuickLogin={handleRoleSwitch}
             />
           )}
 

@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-title MediSync Clinic - Microservices Starter (MSS301 - Nhom 09)
+title MediSync Clinic - Microservices Starter (MSS301 - Nhom 05)
 color 0B
 
 set "ROOT_DIR=%~dp0"
@@ -10,7 +10,7 @@ set "PATH=%PATH%;C:\Program Files\maven-mvnd-1.0.2-windows-amd64\mvn\bin;C:\User
 :menu
 cls
 echo ================================================================================
-echo         HE THONG DAT LICH KHAM BENH MEDISYNC CLINIC (MSS301 - NHOM 09)
+echo         HE THONG DAT LICH KHAM BENH MEDISYNC CLINIC (MSS301 - NHOM 05)
 echo   Truong nhom: Nguyen Manh Quan (Leader) ^| Thanh vien: Nam, Muoi, Long, Vu
 echo ================================================================================
 echo.
@@ -246,7 +246,7 @@ REM ============================================================================
 REM HELPER FUNCTIONS
 REM ================================================================================
 :check_shared_libs
-if not exist "%USERPROFILE%\.m2\repository\com\group09\common-security\1.0-SNAPSHOT" (
+if not exist "%USERPROFILE%\.m2\repository\com\group05\common-security\1.0-SNAPSHOT" (
     echo [THONG BAO] Phat hien chua build thu vien shared: common-security, common-events, common-web
     echo Dang tu dong chay 'mvn install -DskipTests' lan dau de cai vao .m2...
     cd /d "%ROOT_DIR%"

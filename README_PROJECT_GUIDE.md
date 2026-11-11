@@ -1,7 +1,7 @@
 # HƯỚNG DẪN DỰ ÁN HỆ THỐNG PHÒNG KHÁM MEDISYNC (MSS301)
 > **Môn học:** MSS301 - Microservices Architecture  
-> **Nhóm thực hiện:** Group 09  
-> **Kiến trúc:** Spring Boot Microservices (com.group09) + Clean Architecture + Event-Driven (RabbitMQ) + React Frontend (Vite)
+> **Nhóm thực hiện:** Group 05  
+> **Kiến trúc:** Spring Boot Microservices (com.group05) + Clean Architecture + Event-Driven (RabbitMQ) + React Frontend (Vite)
 
 ---
 
@@ -49,7 +49,7 @@ docker compose up -d appointment-db doctor-db patient-db user-db payment-db noti
 
 ### Bước 2: Chạy Backend trên IntelliJ IDEA
 1. Mở thư mục gốc: `C:\Users\Quan\Documents\Chuyen nganh ki 8\MSS301\Code\clinic-appointment-system-main` trực tiếp bằng IntelliJ IDEA.
-2. Maven sẽ tự nhận diện 13 modules (`com.group09`).
+2. Maven sẽ tự nhận diện 13 modules (`com.group05`).
 3. Chạy theo thứ tự ưu tiên:
    - `EurekaServerApplication` (`infra/eureka-server`) -> Kiểm tra Dashboard tại `http://localhost:8761`
    - `ConfigServerApplication` (`infra/config-server`)

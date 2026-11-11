@@ -15,7 +15,7 @@ Dự án được tổ chức thành ba nhóm chính:
 | Thành phần | Giá trị |
 | --- | --- |
 | Tên dự án | Clinic Appointment |
-| Group ID | `com.group09` |
+| Group ID | `com.group05` |
 | Build tool | Maven |
 | Java version | 21 |
 | Spring Boot | 3.5.14 |
@@ -258,14 +258,14 @@ Controller
 Package gốc:
 
 ```text
-com.group09.appointment
+com.group05.appointment
 ```
 
 Cấu trúc đã bắt đầu dựng:
 
 ```text
 appointment-service/
-`-- src/main/java/com/group09/appointment/
+`-- src/main/java/com/group05/appointment/
     |-- api/
     |   |-- controller/
     |   |-- dto/

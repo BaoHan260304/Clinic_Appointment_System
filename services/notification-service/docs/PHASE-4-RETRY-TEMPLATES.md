@@ -23,7 +23,7 @@ ext_retry_at <= now
 ## 🔨 Các Class Cần Tạo / Hoàn Thiện
 
 ### 1. Scheduler Job for Retry
-Tạo: com.group09.notification.infrastructure.scheduler.NotificationRetryScheduler
+Tạo: com.group05.notification.infrastructure.scheduler.NotificationRetryScheduler
 - Annotation: @Scheduled(cron = "0 */1 * * * *")
 - Logic:
   1. Quét DB: deliveryRepository.findDeliveriesDueForRetry()
@@ -31,8 +31,9 @@ Tạo: com.group09.notification.infrastructure.scheduler.NotificationRetrySchedu
   3. Cập nhật status
 
 ### 2. Template System
-Hoàn thiện logic trong: com.group09.notification.infrastructure.sender.NotificationTemplateService
-- Logic enderTemplate():
+Hoàn thiện logic trong: com.group05.notification.infrastructure.sender.NotificationTemplateService
+- Logic 
+enderTemplate():
   - Lấy template từ DB: 	emplateRepository.findByKeyAndActiveTrue(key)
   - Replace placeholders {name}, {date} bằng map variables
   - Thêm HTML format cho email đẹp mắt

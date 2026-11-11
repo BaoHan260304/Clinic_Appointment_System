@@ -14,7 +14,9 @@ import {
   ShieldCheck,
   Heart,
   Star,
-  Users
+  Users,
+  User,
+  LogIn
 } from 'lucide-react';
 
 export default function DashboardView({ 
@@ -23,7 +25,9 @@ export default function DashboardView({
   payments = [], 
   currentUser,
   onNewAppointmentClick, 
-  onNavigateTab 
+  onNavigateTab,
+  onOpenLoginModal,
+  onQuickLogin
 }) {
   const role = currentUser?.role || 'PATIENT';
 
@@ -47,6 +51,304 @@ export default function DashboardView({
     .filter(p => p.status === 'PAID')
     .reduce((acc, cur) => acc + (cur.amount || 0), 0);
   const pendingCount = appointments.filter(a => a.status === 'PENDING').length;
+
+  // RENDER GUEST / PUBLIC CLINIC DASHBOARD (When not logged in)
+  if (!currentUser) {
+    return (
+      <div>
+        {/* Guest Hero Banner */}
+        <div style={{
+          background: 'linear-gradient(135deg, #0d9488 0%, #0284c7 100%)',
+          color: 'white',
+          borderRadius: '16px',
+          padding: '36px 36px',
+          marginBottom: '28px',
+          boxShadow: '0 10px 25px -5px rgba(13, 148, 136, 0.3)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '24px'
+        }}>
+          <div style={{ maxWidth: '640px' }}>
+            <div style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              background: 'rgba(255,255,255,0.2)', 
+              padding: '6px 14px', 
+              borderRadius: '999px', 
+              fontSize: '12px', 
+              fontWeight: 700, 
+              marginBottom: '14px' 
+            }}>
+              <Heart size={15} /> Phòng Khám Đa Khoa Quốc Tế MediSync Clinic
+            </div>
+            <h1 style={{ fontSize: '28px', fontWeight: 900, marginBottom: '12px', lineHeight: 1.3 }}>
+              Đặt Lịch Khám Bệnh Thông Minh & Quản Lý Hồ Sơ Điện Tử 🏥
+            </h1>
+            <p style={{ opacity: 0.95, fontSize: '15px', lineHeight: 1.6, marginBottom: '22px' }}>
+              Giải pháp y tế số hoá hiện đại dựa trên kiến trúc Microservices 5 tầng. Đặt lịch khám nhanh chóng chỉ trong 45 giây, chủ động lựa chọn bác sĩ chuyên khoa & khung giờ, thông báo tự động và thanh toán viện phí trực tuyến không tiền mặt.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button 
+                className="btn" 
+                onClick={onNewAppointmentClick}
+                style={{ 
+                  backgroundColor: '#ffffff', 
+                  color: '#0f766e', 
+                  fontWeight: 800, 
+                  padding: '12px 22px', 
+                  borderRadius: '10px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <PlusCircle size={18} />
+                <span>Đặt Lịch Khám Ngay</span>
+              </button>
+              <button 
+                className="btn" 
+                onClick={() => onNavigateTab('doctors')}
+                style={{ 
+                  backgroundColor: 'rgba(255,255,255,0.15)', 
+                  color: '#ffffff', 
+                  border: '1px solid rgba(255,255,255,0.4)',
+                  fontWeight: 700, 
+                  padding: '12px 20px', 
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <span>Xem Đội Ngũ Bác Sĩ</span>
+                <ArrowRight size={16} />
+              </button>
+              {onOpenLoginModal && (
+                <button 
+                  className="btn" 
+                  onClick={onOpenLoginModal}
+                  style={{ 
+                    backgroundColor: 'rgba(255,255,255,0.25)', 
+                    color: '#ffffff', 
+                    fontWeight: 700, 
+                    padding: '12px 20px', 
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <User size={16} />
+                  <span>Đăng Nhập / Đăng Ký</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div style={{
+            background: 'rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '16px',
+            padding: '20px 24px',
+            minWidth: '240px'
+          }}>
+            <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '12px', opacity: 0.9 }}>
+              ⚡ TRẢI NGHIỆM NHANH (DEMO MSS301)
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button 
+                className="btn btn-sm" 
+                style={{ backgroundColor: '#ffffff', color: '#166534', fontWeight: 700, justifyContent: 'flex-start' }}
+                onClick={() => onQuickLogin && onQuickLogin('PATIENT')}
+              >
+                <span>👤 Đăng nhập: Bệnh nhân Quân</span>
+              </button>
+              <button 
+                className="btn btn-sm" 
+                style={{ backgroundColor: '#ffffff', color: '#1e40af', fontWeight: 700, justifyContent: 'flex-start' }}
+                onClick={() => onQuickLogin && onQuickLogin('DOCTOR')}
+              >
+                <span>🩺 Đăng nhập: BS. Nguyễn Văn An</span>
+              </button>
+              <button 
+                className="btn btn-sm" 
+                style={{ backgroundColor: '#ffffff', color: '#6d28d9', fontWeight: 700, justifyContent: 'flex-start' }}
+                onClick={() => onQuickLogin && onQuickLogin('ADMIN')}
+              >
+                <span>🛡️ Đăng nhập: Quản trị viên Admin</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Public Stat Grid */}
+        <div className="stat-grid" style={{ marginBottom: '32px' }}>
+          <div className="stat-card">
+            <div className="stat-icon-wrapper" style={{ backgroundColor: '#f0fdfa', color: '#0d9488' }}>
+              <Stethoscope size={24} />
+            </div>
+            <div>
+              <div className="stat-value">{doctors.length || 8}</div>
+              <div className="stat-label">Bác sĩ chuyên khoa hàng đầu</div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon-wrapper" style={{ backgroundColor: '#eff6ff', color: '#2563eb' }}>
+              <CalendarCheck size={24} />
+            </div>
+            <div>
+              <div className="stat-value">{appointments.length || 24}</div>
+              <div className="stat-label">Lịch hẹn đã tiếp nhận</div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon-wrapper" style={{ backgroundColor: '#fffbeb', color: '#d97706' }}>
+              <Clock size={24} />
+            </div>
+            <div>
+              <div className="stat-value">45 Phút</div>
+              <div className="stat-label">Khung giờ chuẩn (Optimistic Lock)</div>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon-wrapper" style={{ backgroundColor: '#ecfdf5', color: '#059669' }}>
+              <CreditCard size={24} />
+            </div>
+            <div>
+              <div className="stat-value">100%</div>
+              <div className="stat-label">Thanh toán VNPay QR tiện lợi</div>
+            </div>
+          </div>
+        </div>
+
+        {/* 4 Steps Clinic Workflow */}
+        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px 28px', border: '1px solid #e2e8f0', marginBottom: '32px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+            Quy Trình Khám Bệnh 4 Bước Đơn Giản & Hiện Đại
+          </h3>
+          <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>
+            Hệ thống tự động hóa điều phối qua kiến trúc Microservices và hàng đợi sự kiện RabbitMQ.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+            <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#0d9488', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, marginBottom: '10px' }}>1</div>
+              <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>Chọn Bác Sĩ & Giờ Khám</h4>
+              <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: 0 }}>Chủ động chọn khoa và slot 45 phút. Hệ thống dùng Optimistic Lock chống đặt trùng.</p>
+            </div>
+            <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#2563eb', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, marginBottom: '10px' }}>2</div>
+              <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>Nhận Thông Báo Tức Thời</h4>
+              <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: 0 }}>Notification Service tự động gửi email/tin nhắn xác nhận sự kiện qua RabbitMQ.</p>
+            </div>
+            <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#7c3aed', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, marginBottom: '10px' }}>3</div>
+              <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>Thăm Khám & Bệnh Án Số</h4>
+              <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: 0 }}>Bác sĩ khám trực tiếp và lưu bệnh án điện tử an toàn, chuẩn bảo mật HIPAA.</p>
+            </div>
+            <div style={{ padding: '16px', borderRadius: '12px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#059669', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, marginBottom: '10px' }}>4</div>
+              <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>Thanh Toán Viện Phí QR</h4>
+              <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.5, margin: 0 }}>Quét mã QR qua cổng VNPay/MoMo để thanh toán nhanh, không cần xếp hàng.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Featured Doctors Section */}
+        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px 28px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
+                Đội Ngũ Bác Sĩ Chuyên Khoa Tiêu Biểu
+              </h3>
+              <p style={{ fontSize: '13px', color: '#64748b' }}>
+                Các bác sĩ giàu kinh nghiệm sẵn sàng thăm khám và tư vấn tận tâm.
+              </p>
+            </div>
+            <button 
+              className="btn btn-secondary btn-sm"
+              onClick={() => onNavigateTab('doctors')}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <span>Xem tất cả ({doctors.length})</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+            {doctors.slice(0, 3).map((doc, idx) => (
+              <div key={doc.id || idx} style={{
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                padding: '18px',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                    <div style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '50%',
+                      backgroundColor: '#eff6ff',
+                      color: '#2563eb',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 800,
+                      fontSize: '15px'
+                    }}>
+                      {doc.name ? doc.name.charAt(doc.name.lastIndexOf(' ') + 1) : 'BS'}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a' }}>{doc.name}</div>
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        backgroundColor: '#f0fdfa',
+                        color: '#0f766e',
+                        padding: '1px 8px',
+                        borderRadius: '999px',
+                        border: '1px solid #ccfbf1'
+                      }}>
+                        {doc.specialty}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '10px' }}>
+                    Phòng khám: <strong>{doc.room || 'P.201'}</strong> • Kinh nghiệm: <strong>{doc.experience || '10+ năm'}</strong>
+                  </div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0d9488', marginBottom: '14px' }}>
+                    Phí khám: {doc.price ? Number(doc.price).toLocaleString('vi-VN') + ' đ' : '250.000 đ'}
+                  </div>
+                </div>
+
+                <button 
+                  className="btn btn-primary btn-sm"
+                  onClick={onNewAppointmentClick}
+                  style={{ width: '100%', justifyContent: 'center' }}
+                >
+                  <PlusCircle size={14} />
+                  <span>Đặt Lịch Ngay</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // RENDER PATIENT DASHBOARD
   if (role === 'PATIENT') {

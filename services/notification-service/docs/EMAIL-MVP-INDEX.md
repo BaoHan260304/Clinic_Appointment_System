@@ -36,7 +36,7 @@
 
 ```
 services/notification-service/
-├── src/main/java/com/group09/notification/
+├── src/main/java/com/group05/notification/
 │   ├── domain/
 │   │   └── vo/
 │   │       └── EmailType.java

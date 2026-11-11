@@ -8,7 +8,7 @@
 
 ## 🎯 Các Endpoints Cần Tạo
 
-### 1. Notification Controller (com.group09.notification.api.controller.NotificationController)
+### 1. Notification Controller (com.group05.notification.api.controller.NotificationController)
 
 - **POST** /api/notifications
   - Body: CreateNotificationRequest

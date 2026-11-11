@@ -12,11 +12,18 @@ import {
 } from 'lucide-react';
 
 export default function Sidebar({ currentTab, setCurrentTab, stats, currentUser }) {
-  const role = currentUser?.role || 'PATIENT';
+  const role = currentUser?.role;
 
   // Customize menu items by role
   let navItems = [];
-  if (role === 'PATIENT') {
+  if (!currentUser) {
+    navItems = [
+      { id: 'dashboard', label: 'Trang chủ Phòng khám', icon: LayoutDashboard },
+      { id: 'doctors', label: 'Đội ngũ Bác sĩ', icon: UserCheck },
+      { id: 'appointments', label: 'Đặt lịch khám bệnh', icon: CalendarCheck },
+      { id: 'system', label: 'Kiến trúc Microservices', icon: Server, highlight: true }
+    ];
+  } else if (role === 'PATIENT') {
     navItems = [
       { id: 'dashboard', label: 'Trang cá nhân', icon: LayoutDashboard },
       { id: 'appointments', label: 'Lịch khám của tôi', icon: CalendarCheck, badge: stats?.myUpcomingAppointments || null },

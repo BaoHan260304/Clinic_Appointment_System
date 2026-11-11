@@ -45,8 +45,8 @@ clients:
 
 logging:
   level:
-    com.group09.user: INFO
-    com.group09.commonsecurity: INFO
+    com.group05.user: INFO
+    com.group05.commonsecurity: INFO
 
 management:
   endpoints:

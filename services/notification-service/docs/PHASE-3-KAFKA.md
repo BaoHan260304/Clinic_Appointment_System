@@ -21,7 +21,7 @@ Other Services (Appointment, Doctor)
 ## 🔨 Các Class Cần Tạo
 
 ### 1. Kafka Consumer (Listener)
-Tạo: com.group09.notification.infrastructure.event.KafkaNotificationListener
+Tạo: com.group05.notification.infrastructure.event.KafkaNotificationListener
 - Method: @KafkaListener(topics = "notification-events")
 - Logic:
   1. Parse message (JSON)
@@ -32,7 +32,7 @@ Tạo: com.group09.notification.infrastructure.event.KafkaNotificationListener
 - NotificationEventPayload: Định nghĩa cấu trúc JSON event từ Kafka
 
 ### 3. UseCase: ProcessInboxEvent
-Tạo: com.group09.notification.application.usecase.ProcessInboxEventUseCase
+Tạo: com.group05.notification.application.usecase.ProcessInboxEventUseCase
 - Logic:
   1. Kiểm tra deduplication (inboxEventRepository.existsBySourceEventId)
   2. Lưu vào 

@@ -1,12 +1,12 @@
 import React from 'react';
-import { UserCheck, ShieldCheck, Stethoscope, ArrowRight, Sparkles } from 'lucide-react';
+import { UserCheck, ShieldCheck, Stethoscope, Sparkles } from 'lucide-react';
 
 export default function RoleBanner({ currentUser, onSwitchRole }) {
   if (!currentUser) {
     return (
       <div style={{
-        backgroundColor: '#fffbeb',
-        border: '1px solid #fde68a',
+        backgroundColor: '#f0fdfa',
+        border: '1px solid #ccfbf1',
         borderRadius: '12px',
         padding: '12px 18px',
         marginBottom: '20px',
@@ -21,8 +21,8 @@ export default function RoleBanner({ currentUser, onSwitchRole }) {
             width: '36px',
             height: '36px',
             borderRadius: '8px',
-            backgroundColor: '#fef3c7',
-            color: '#d97706',
+            backgroundColor: '#ccfbf1',
+            color: '#0f766e',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -31,20 +31,35 @@ export default function RoleBanner({ currentUser, onSwitchRole }) {
             <Sparkles size={20} />
           </div>
           <div>
-            <div style={{ fontSize: '13px', fontWeight: 800, color: '#92400e' }}>
-              CHẾ ĐỘ KHÁCH (CHƯA ĐĂNG NHẬP)
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f766e' }}>
+              CHẾ ĐỘ XEM TỔNG QUAN PHÒNG KHÁM (CHƯA ĐĂNG NHẬP)
             </div>
-            <p style={{ fontSize: '12px', color: '#b45309', margin: '2px 0 0' }}>
-              Bạn đang duyệt thông tin công khai. Hãy chọn 1 vai trò bên phải để đăng nhập nhanh, hoặc bấm nút "Đăng nhập / Đăng ký" trên thanh Header!
+            <p style={{ fontSize: '12px', color: '#115e59', margin: '2px 0 0' }}>
+              Bạn đang xem trang chủ công khai của phòng khám MediSync. Bấm "Đăng nhập / Đăng ký" trên Header hoặc bấm nhanh các vai trò thử nghiệm bên phải:
             </p>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn btn-primary btn-sm" onClick={() => onSwitchRole('PATIENT')}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button 
+            className="btn btn-sm" 
+            style={{ backgroundColor: '#ffffff', color: '#166534', border: '1px solid #bbf7d0', fontSize: '12px', fontWeight: 600 }}
+            onClick={() => onSwitchRole('PATIENT')}
+          >
             Đăng nhập Bệnh nhân
           </button>
-          <button className="btn btn-secondary btn-sm" onClick={() => onSwitchRole('DOCTOR')}>
+          <button 
+            className="btn btn-sm" 
+            style={{ backgroundColor: '#ffffff', color: '#1e40af', border: '1px solid #bfdbfe', fontSize: '12px', fontWeight: 600 }}
+            onClick={() => onSwitchRole('DOCTOR')}
+          >
             Đăng nhập Bác sĩ
+          </button>
+          <button 
+            className="btn btn-sm" 
+            style={{ backgroundColor: '#ffffff', color: '#6d28d9', border: '1px solid #ddd6fe', fontSize: '12px', fontWeight: 600 }}
+            onClick={() => onSwitchRole('ADMIN')}
+          >
+            Đăng nhập Admin
           </button>
         </div>
       </div>
@@ -84,7 +99,7 @@ export default function RoleBanner({ currentUser, onSwitchRole }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '13px', fontWeight: 800, color: '#166534' }}>
-                GÓC NHÌN BỆNH NHÂN (Nguyễn Mạnh Quân)
+                GÓC NHÌN BỆNH NHÂN ({currentUser.name || 'Nguyễn Mạnh Quân'})
               </span>
               <span style={{
                 fontSize: '11px',
@@ -155,7 +170,7 @@ export default function RoleBanner({ currentUser, onSwitchRole }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '13px', fontWeight: 800, color: '#1e40af' }}>
-                GÓC NHÌN BÁC SĨ (BS. CKI Nguyễn Văn An - Nội Tổng Quát)
+                GÓC NHÌN BÁC SĨ ({currentUser.name || 'BS. CKI Nguyễn Văn An'})
               </span>
               <span style={{
                 fontSize: '11px',

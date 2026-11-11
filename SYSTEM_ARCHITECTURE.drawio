@@ -10,7 +10,7 @@
         <mxCell id="1" parent="0" />
 
         <!-- Header Title Banner -->
-        <mxCell id="hdr_title" value="HỆ THỐNG PHÒNG KHÁM ĐA KHOA MEDISYNC - KIẾN TRÚC SPRING BOOT MICROSERVICES (MSS301 - NHÓM 09)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=18;fontStyle=1;fillColor=#0f766e;strokeColor=#115e59;fontColor=#ffffff;shadow=1;" vertex="1" parent="1">
+        <mxCell id="hdr_title" value="HỆ THỐNG PHÒNG KHÁM ĐA KHOA MEDISYNC - KIẾN TRÚC SPRING BOOT MICROSERVICES (MSS301 - NHÓM 05)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=18;fontStyle=1;fillColor=#0f766e;strokeColor=#115e59;fontColor=#ffffff;shadow=1;" vertex="1" parent="1">
           <mxGeometry x="50" y="30" width="1600" height="50" as="geometry" />
         </mxCell>
 

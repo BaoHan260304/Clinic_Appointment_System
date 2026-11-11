@@ -81,9 +81,9 @@ Estimated time: 2-3 hours
 
 ## 📍 KEY FILES LOCATIONS
 
-**Domain:** \src/main/java/com/group09/notification/domain/\
-**Application:** \src/main/java/com/group09/notification/application/\
-**Infrastructure:** \src/main/java/com/group09/notification/infrastructure/\
+**Domain:** \src/main/java/com/group05/notification/domain/\
+**Application:** \src/main/java/com/group05/notification/application/\
+**Infrastructure:** \src/main/java/com/group05/notification/infrastructure/\
 **Configuration:** \pom.xml\, \src/main/resources/application.yml\
 
 ---

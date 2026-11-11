@@ -1,0 +1,12 @@
+package com.group05.patient.api.dto;
+
+import java.time.LocalDate;
+
+public record UpdatePatientRequest(
+        String firstName,
+        String lastName,
+        LocalDate dateOfBirth,
+        String gender,
+        String contactInformation
+) {
+}

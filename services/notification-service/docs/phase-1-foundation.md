@@ -96,7 +96,7 @@ Phase 1 là nền tảng của toàn bộ notification service. Nếu không ho�
 
 \\\
 notification-service/
-└── src/main/java/com/group09/notification/
+└── src/main/java/com/group05/notification/
     ├── domain/
     │   ├── aggregate/
     │   │   └── NotificationAggregate.java          ← TẠO MỚI
@@ -140,7 +140,7 @@ notification-service/
 
 **1.1 NotificationId.java**
 \\\java
-package com.group09.notification.domain.vo;
+package com.group05.notification.domain.vo;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -177,7 +177,7 @@ public class NotificationId {
 
 **1.2 NotificationTitle.java**
 \\\java
-package com.group09.notification.domain.vo;
+package com.group05.notification.domain.vo;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -211,7 +211,7 @@ public class NotificationTitle {
 
 **1.3 NotificationChannel.java (Enum)**
 \\\java
-package com.group09.notification.domain.vo;
+package com.group05.notification.domain.vo;
 
 public enum NotificationChannel {
     IN_APP,
@@ -225,7 +225,7 @@ public enum NotificationChannel {
 
 **1.4 NotificationPriority.java**
 \\\java
-package com.group09.notification.domain.vo;
+package com.group05.notification.domain.vo;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -268,9 +268,9 @@ public class NotificationPriority {
 
 **2.1 NotificationDelivery.java**
 \\\java
-package com.group09.notification.domain.entity;
+package com.group05.notification.domain.entity;
 
-import com.group09.notification.domain.vo.*;
+import com.group05.notification.domain.vo.*;
 import lombok.Getter;
 import java.time.Instant;
 import java.util.UUID;
@@ -339,10 +339,10 @@ public class NotificationDelivery {
 
 **3.1 NotificationAggregate.java**
 \\\java
-package com.group09.notification.domain.aggregate;
+package com.group05.notification.domain.aggregate;
 
-import com.group09.notification.domain.entity.NotificationDelivery;
-import com.group09.notification.domain.vo.*;
+import com.group05.notification.domain.entity.NotificationDelivery;
+import com.group05.notification.domain.vo.*;
 import lombok.Getter;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -426,11 +426,11 @@ public class NotificationAggregate {
 
 **4.1 NotificationRepository.java**
 \\\java
-package com.group09.notification.domain.repository;
+package com.group05.notification.domain.repository;
 
-import com.group09.notification.domain.aggregate.NotificationAggregate;
-import com.group09.notification.domain.vo.NotificationId;
-import com.group09.notification.domain.vo.RecipientId;
+import com.group05.notification.domain.aggregate.NotificationAggregate;
+import com.group05.notification.domain.vo.NotificationId;
+import com.group05.notification.domain.vo.RecipientId;
 import java.util.List;
 import java.util.Optional;
 
@@ -449,7 +449,7 @@ public interface NotificationRepository {
 
 **5.1 CreateNotificationCommand.java**
 \\\java
-package com.group09.notification.application.command;
+package com.group05.notification.application.command;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -487,13 +487,13 @@ public class CreateNotificationCommand {
 
 **6.2 JpaConfig.java**
 \\\java
-package com.group09.notification.config;
+package com.group05.notification.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@EnableJpaRepositories(basePackages = "com.group09.notification.infrastructure.persistence")
+@EnableJpaRepositories(basePackages = "com.group05.notification.infrastructure.persistence")
 public class JpaConfig {
 }
 \\\
@@ -504,7 +504,7 @@ public class JpaConfig {
 
 **7.1 NotificationJpaEntity.java - Thêm annotations**
 \\\java
-package com.group09.notification.infrastructure.persistence;
+package com.group05.notification.infrastructure.persistence;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -572,7 +572,7 @@ public class NotificationJpaEntity {
 
 **7.2 NotificationDeliveryJpaEntity.java - Thêm annotations**
 \\\java
-package com.group09.notification.infrastructure.persistence;
+package com.group05.notification.infrastructure.persistence;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -643,12 +643,12 @@ public class NotificationDeliveryJpaEntity {
 
 **8.1 NotificationRepositoryAdapter.java**
 \\\java
-package com.group09.notification.infrastructure.persistence;
+package com.group05.notification.infrastructure.persistence;
 
-import com.group09.notification.domain.aggregate.NotificationAggregate;
-import com.group09.notification.domain.repository.NotificationRepository;
-import com.group09.notification.domain.vo.NotificationId;
-import com.group09.notification.domain.vo.RecipientId;
+import com.group05.notification.domain.aggregate.NotificationAggregate;
+import com.group05.notification.domain.repository.NotificationRepository;
+import com.group05.notification.domain.vo.NotificationId;
+import com.group05.notification.domain.vo.RecipientId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import java.util.List;
@@ -704,11 +704,11 @@ public class NotificationRepositoryAdapter implements NotificationRepository {
 
 **9.1 NotificationMapper.java**
 \\\java
-package com.group09.notification.infrastructure.persistence;
+package com.group05.notification.infrastructure.persistence;
 
-import com.group09.notification.domain.aggregate.NotificationAggregate;
-import com.group09.notification.domain.entity.NotificationDelivery;
-import com.group09.notification.domain.vo.*;
+import com.group05.notification.domain.aggregate.NotificationAggregate;
+import com.group05.notification.domain.entity.NotificationDelivery;
+import com.group05.notification.domain.vo.*;
 import org.springframework.stereotype.Component;
 import java.util.stream.Collectors;
 

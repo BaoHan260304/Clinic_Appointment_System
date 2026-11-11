@@ -51,13 +51,7 @@ export const api = {
   },
 
   getCurrentUser() {
-    const user = getStoredData(STORAGE_KEYS.USER, {
-      userId: 'p2010000-0000-0000-0000-000000000001',
-      patientId: 'p2010000-0000-0000-0000-000000000001',
-      name: 'Nguyễn Mạnh Quân',
-      email: 'quan.patient@example.com',
-      role: 'PATIENT'
-    });
+    const user = getStoredData(STORAGE_KEYS.USER, null);
     if (user && user.name === 'Đỗ Minh Quân') {
       user.name = 'Nguyễn Mạnh Quân';
       this.setCurrentUser(user);
@@ -66,7 +60,11 @@ export const api = {
   },
 
   setCurrentUser(user) {
-    setStoredData(STORAGE_KEYS.USER, user);
+    if (user) {
+      setStoredData(STORAGE_KEYS.USER, user);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.USER);
+    }
   },
 
   // HTTP Helper cho Gateway
@@ -264,6 +262,41 @@ export const api = {
     this.setCurrentUser(newUser);
     this.setToken('mock_jwt_token_' + Date.now());
     return { success: true, user: newUser };
+  },
+
+  async forgotPassword(email) {
+    if (this.getMode() === 'gateway') {
+      try {
+        return await this.request('/auth/forgot-password', {
+          method: 'POST',
+          body: JSON.stringify({ email })
+        });
+      } catch (err) {
+        console.warn('Gateway forgot-password error, fallback to mock:', err.message);
+      }
+    }
+    return {
+      success: true,
+      otp: '888666',
+      message: `Mã OTP đã được gửi về email ${email} qua hàng đợi RabbitMQ (Notification Service)!`
+    };
+  },
+
+  async resetPassword(email, otp, newPassword) {
+    if (this.getMode() === 'gateway') {
+      try {
+        return await this.request('/auth/reset-password', {
+          method: 'POST',
+          body: JSON.stringify({ email, otp, newPassword })
+        });
+      } catch (err) {
+        console.warn('Gateway reset-password error, fallback to mock:', err.message);
+      }
+    }
+    return {
+      success: true,
+      message: 'Đặt lại mật khẩu thành công! Bạn có thể đăng nhập ngay với mật khẩu mới.'
+    };
   },
 
   logout() {
