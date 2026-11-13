@@ -243,6 +243,37 @@ export const api = {
     }
 
     // Mock Register
+    const targetEmail = (formData.email || '').trim().toLowerCase();
+    if (!targetEmail) {
+      throw new Error('Email không được để trống.');
+    }
+
+    // Kiểm tra trùng email với các tài khoản hệ thống mặc định
+    const defaultEmails = [
+      'quan.patient@example.com',
+      'bs.an@clinic.local',
+      'admin@medisync.local',
+      'bs.bich@clinic.local',
+      'bs.minh@clinic.local',
+      'bs.huong@clinic.local'
+    ];
+
+    const registered = getStoredData('clinic_registered_users', []);
+    
+    // Kiểm tra trùng email
+    const isEmailExisted = defaultEmails.includes(targetEmail) || 
+      registered.some(u => (u.email || '').trim().toLowerCase() === targetEmail);
+
+    if (isEmailExisted) {
+      throw new Error(`Email "${formData.email}" đã tồn tại trên hệ thống. Vui lòng sử dụng email khác hoặc Đăng nhập!`);
+    }
+
+    // Kiểm tra trùng số điện thoại
+    const targetPhone = (formData.phone || formData.phoneNumber || '').trim();
+    if (targetPhone && registered.some(u => (u.phone || '').trim() === targetPhone)) {
+      throw new Error(`Số điện thoại "${targetPhone}" đã được đăng ký cho tài khoản khác.`);
+    }
+
     const newId = `u-${Date.now()}`;
     const isDoc = formData.role === 'DOCTOR';
     const newUser = {
@@ -263,7 +294,6 @@ export const api = {
       address: formData.address || 'Hà Nội'
     };
 
-    const registered = getStoredData('clinic_registered_users', []);
     setStoredData('clinic_registered_users', [...registered, newUser]);
 
     if (!isDoc) {
