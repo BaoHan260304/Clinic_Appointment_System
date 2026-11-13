@@ -12,6 +12,7 @@ import SystemView from './views/SystemView';
 import NewAppointmentModal from './components/NewAppointmentModal';
 import PaymentModal from './components/PaymentModal';
 import AuthModal from './components/AuthModal';
+import LoginView from './views/LoginView';
 import { api } from './api/client';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -27,11 +28,12 @@ export default function App() {
   const [payments, setPayments] = useState([]);
   const [notifications, setNotifications] = useState([]);
   
-  // Modals
+  // Modals & Full Views
   const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
   const [selectedDoctorForBooking, setSelectedDoctorForBooking] = useState(null);
   const [paymentTargetAppointment, setPaymentTargetAppointment] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAuthViewOpen, setIsAuthViewOpen] = useState(false);
   
   // Toast notification
   const [toast, setToast] = useState(null);
@@ -167,7 +169,7 @@ export default function App() {
 
   const handleBookWithDoctor = (doctor) => {
     if (!currentUser) {
-      setIsAuthModalOpen(true);
+      setIsAuthViewOpen(true);
       showToast('Vui lòng đăng nhập hoặc chọn vai trò Bệnh nhân để đặt lịch khám!', 'error');
       return;
     }
@@ -222,6 +224,54 @@ export default function App() {
   const pendingAppointments = appointments.filter(a => a.status === 'PENDING').length;
   const pendingPayments = payments.filter(p => p.status === 'PENDING').length;
 
+  // Standalone Full-screen Login Page View
+  if (isAuthViewOpen || currentTab === 'login') {
+    return (
+      <div className="login-standalone-root">
+        {toast && (
+          <div style={{
+            position: 'fixed',
+            top: '20px',
+            right: '24px',
+            zIndex: 9999,
+            backgroundColor: toast.type === 'error' ? '#ef4444' : '#0d9488',
+            color: 'white',
+            padding: '12px 20px',
+            borderRadius: '10px',
+            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            fontSize: '14px',
+            fontWeight: 600,
+            animation: 'fadeIn 0.2s ease-out'
+          }}>
+            {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+            <span>{toast.message}</span>
+          </div>
+        )}
+        <LoginView 
+          onClose={() => {
+            setIsAuthViewOpen(false);
+            if (currentTab === 'login') setCurrentTab('dashboard');
+          }}
+          onLoginSuccess={async (email, password) => {
+            await handleLoginSuccess(email, password);
+            setIsAuthViewOpen(false);
+            if (currentTab === 'login') setCurrentTab('dashboard');
+          }}
+          onRegisterSuccess={async (formData) => {
+            await handleRegisterSuccess(formData);
+            setIsAuthViewOpen(false);
+            if (currentTab === 'login') setCurrentTab('dashboard');
+          }}
+          mode={mode}
+          setMode={setMode}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="app-container">
       {/* Toast Alert */}
@@ -270,7 +320,7 @@ export default function App() {
           setMode={setMode}
           currentUser={currentUser}
           setCurrentUser={setCurrentUser}
-          onOpenLoginModal={() => setIsAuthModalOpen(true)}
+          onOpenLoginModal={() => setIsAuthViewOpen(true)}
           onLogout={handleLogout}
         />
 
@@ -289,7 +339,7 @@ export default function App() {
               currentUser={currentUser}
               onNewAppointmentClick={() => {
                 if (!currentUser) {
-                  setIsAuthModalOpen(true);
+                  setIsAuthViewOpen(true);
                   showToast('Vui lòng đăng nhập hoặc chọn vai trò Bệnh nhân để đặt lịch khám!', 'error');
                 } else {
                   setSelectedDoctorForBooking(null);
@@ -297,7 +347,7 @@ export default function App() {
                 }
               }}
               onNavigateTab={setCurrentTab}
-              onOpenLoginModal={() => setIsAuthModalOpen(true)}
+              onOpenLoginModal={() => setIsAuthViewOpen(true)}
               onQuickLogin={handleRoleSwitch}
             />
           )}

@@ -140,11 +140,11 @@ export default function Header({
           <button 
             className="btn btn-primary btn-sm" 
             onClick={onOpenLoginModal}
-            title="Đăng nhập hoặc Đăng ký tài khoản mới"
+            title="Mở màn hình đăng nhập hoặc đăng ký tài khoản độc lập"
             style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px' }}
           >
             <LogIn size={15} />
-            <span>Đăng nhập / Đăng ký</span>
+            <span>Trang Đăng Nhập / Đăng Ký</span>
           </button>
         )}
       </div>

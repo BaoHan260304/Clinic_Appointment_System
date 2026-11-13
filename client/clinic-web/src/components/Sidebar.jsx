@@ -8,7 +8,8 @@ import {
   Bell, 
   Server, 
   HeartPulse,
-  Sparkles
+  Sparkles,
+  LogIn
 } from 'lucide-react';
 
 export default function Sidebar({ currentTab, setCurrentTab, stats, currentUser }) {
@@ -21,7 +22,8 @@ export default function Sidebar({ currentTab, setCurrentTab, stats, currentUser 
       { id: 'dashboard', label: 'Trang chủ Phòng khám', icon: LayoutDashboard },
       { id: 'doctors', label: 'Đội ngũ Bác sĩ', icon: UserCheck },
       { id: 'appointments', label: 'Đặt lịch khám bệnh', icon: CalendarCheck },
-      { id: 'system', label: 'Kiến trúc Microservices', icon: Server, highlight: true }
+      { id: 'login', label: 'Trang Đăng Nhập (Nam)', icon: LogIn, highlight: true },
+      { id: 'system', label: 'Kiến trúc Microservices', icon: Server }
     ];
   } else if (role === 'PATIENT') {
     navItems = [
@@ -30,6 +32,7 @@ export default function Sidebar({ currentTab, setCurrentTab, stats, currentUser 
       { id: 'doctors', label: 'Tìm Bác sĩ khám', icon: UserCheck },
       { id: 'payments', label: 'Viện phí của tôi', icon: CreditCard, badge: stats?.myPendingPayments || null },
       { id: 'notifications', label: 'Hộp thư thông báo', icon: Bell },
+      { id: 'login', label: 'Bảo mật & Auth (Nam)', icon: LogIn },
       { id: 'system', label: 'Kiến trúc Microservices', icon: Server, highlight: true }
     ];
   } else if (role === 'DOCTOR') {
@@ -39,6 +42,7 @@ export default function Sidebar({ currentTab, setCurrentTab, stats, currentUser 
       { id: 'patients', label: 'Bệnh nhân điều trị', icon: Users },
       { id: 'doctors', label: 'Ca trực & Lịch làm', icon: UserCheck },
       { id: 'notifications', label: 'Thông báo ca trực', icon: Bell },
+      { id: 'login', label: 'Bảo mật & Auth (Nam)', icon: LogIn },
       { id: 'system', label: 'Kiến trúc Microservices', icon: Server, highlight: true }
     ];
   } else {
@@ -50,6 +54,7 @@ export default function Sidebar({ currentTab, setCurrentTab, stats, currentUser 
       { id: 'patients', label: 'Hồ sơ bệnh nhân', icon: Users },
       { id: 'payments', label: 'Doanh thu & Viện phí', icon: CreditCard, badge: stats?.pendingPayments || null },
       { id: 'notifications', label: 'Lịch sử sự kiện RabbitMQ', icon: Bell },
+      { id: 'login', label: 'Bảo mật & Auth (Nam)', icon: LogIn },
       { id: 'system', label: 'Kiến trúc Microservices', icon: Server, highlight: true }
     ];
   }
