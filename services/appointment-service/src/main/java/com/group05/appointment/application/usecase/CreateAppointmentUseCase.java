@@ -10,6 +10,7 @@ import com.group05.appointment.domain.aggregate.AppointmentAggregate;
 import com.group05.appointment.domain.repository.AppointmentLogRepository;
 import com.group05.appointment.domain.repository.AppointmentRepository;
 import com.group05.appointment.domain.vo.AppointmentReason;
+import com.group05.appointment.domain.vo.AppointmentStatus;
 import com.group05.appointment.domain.vo.AppointmentTime;
 import com.group05.appointment.domain.vo.DoctorId;
 import com.group05.appointment.domain.vo.PatientId;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -44,6 +46,23 @@ public class CreateAppointmentUseCase {
         validate(command);
 
         UUID patientId = patientClientPort.getOrCreatePatientIdByUserId(command.patientUserId(), command.patientEmail());
+
+        List<AppointmentAggregate> existingAppointments = appointmentRepository.findByPatientId(PatientId.of(patientId));
+        if (existingAppointments != null) {
+            boolean hasConflict = existingAppointments.stream()
+                    .filter(a -> a.getStatus() != AppointmentStatus.CANCELLED
+                            && a.getStatus() != AppointmentStatus.CANCELLED_BY_DOCTOR
+                            && a.getStatus() != AppointmentStatus.PAYMENT_EXPIRED)
+                    .anyMatch(a -> {
+                        LocalDateTime start = a.getAppointmentTime().startTime();
+                        LocalDateTime end = a.getAppointmentTime().endTime();
+                        return command.startTime().isBefore(end) && command.endTime().isAfter(start);
+                    });
+            if (hasConflict) {
+                throw new IllegalArgumentException("Bạn đã có một lịch hẹn trong khung giờ này. Không thể đặt trùng ca.");
+            }
+        }
+
         AssignedDoctorSlot assignedSlot = doctorClientPort.assignSlot(
                 command.specialization().trim(),
                 command.startTime(),

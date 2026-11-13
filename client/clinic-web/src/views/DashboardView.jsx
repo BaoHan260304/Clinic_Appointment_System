@@ -1,4 +1,5 @@
 import React from 'react';
+import { isDemoPatient, matchesPatient } from '../api/client';
 import { 
   CalendarCheck, 
   Clock, 
@@ -31,16 +32,15 @@ export default function DashboardView({
 }) {
   const role = currentUser?.role || 'PATIENT';
 
-  const pName = (!currentUser?.name || currentUser.name.includes('@') || currentUser.name === 'quan.patient' || currentUser.name === 'Đỗ Minh Quân')
-    ? 'Nguyễn Mạnh Quân'
-    : currentUser.name;
+  const isDemo = isDemoPatient(currentUser);
+  const patientDisplayName = isDemo ? 'Nguyễn Mạnh Quân' : (currentUser?.name || currentUser?.fullName || 'Bệnh nhân');
 
-  // Role-specific datasets
-  const myAppointments = appointments.filter(a => a.patientName === pName || a.patientName === 'Nguyễn Mạnh Quân' || a.patientId === currentUser?.patientId);
+  // Role-specific datasets (Strictly scoped by patient identity, zero data leakage)
+  const myAppointments = appointments.filter(a => matchesPatient(a, currentUser));
   const myPendingCount = myAppointments.filter(a => a.status === 'PENDING').length;
   const myConfirmedCount = myAppointments.filter(a => a.status === 'CONFIRMED').length;
   const myPaidRevenue = payments
-    .filter(p => (p.patientName === pName || p.patientName === 'Nguyễn Mạnh Quân' || p.patientId === currentUser?.patientId) && p.status === 'PAID')
+    .filter(p => matchesPatient(p, currentUser) && p.status === 'PAID')
     .reduce((acc, cur) => acc + (cur.amount || 0), 0);
 
   const doctorAppointments = appointments.filter(a => a.doctorName?.includes('Nguyễn Văn An') || a.doctorId === currentUser?.doctorId);
@@ -371,7 +371,7 @@ export default function DashboardView({
               <Heart size={14} /> Chăm sóc sức khỏe toàn diện cho bạn
             </div>
             <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '6px' }}>
-              Xin chào, {currentUser?.name || 'Nguyễn Mạnh Quân'}! 👋
+              Xin chào, {patientDisplayName}! 👋
             </h2>
             <p style={{ opacity: 0.95, fontSize: '14px', maxWidth: '600px' }}>
               Chào mừng bạn quay lại hệ thống khám bệnh MediSync. Tại đây bạn có thể đặt lịch khám nhanh, theo dõi kết quả và đóng viện phí trực tuyến an toàn.
@@ -446,7 +446,7 @@ export default function DashboardView({
             <div className="card-header">
               <div>
                 <h3 className="card-title">Lịch Khám Sắp Tới Của Bạn</h3>
-                <p style={{ fontSize: '13px', color: '#64748b' }}>Chỉ hiển thị các lịch hẹn riêng của bệnh nhân Nguyễn Mạnh Quân</p>
+                <p style={{ fontSize: '13px', color: '#64748b' }}>Chỉ hiển thị các lịch hẹn riêng của bệnh nhân {patientDisplayName}</p>
               </div>
               <button 
                 className="btn btn-secondary btn-sm"
@@ -512,25 +512,27 @@ export default function DashboardView({
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13px' }}>
               <div style={{ padding: '12px', background: '#ecfdf5', borderRadius: '8px', border: '1px solid #a7f3d0' }}>
-                <div style={{ fontWeight: 700, color: '#065f46' }}>Bệnh nhân: Nguyễn Mạnh Quân</div>
-                <div style={{ color: '#047857', marginTop: '4px' }}>Mã BN: p2010000-0001</div>
+                <div style={{ fontWeight: 700, color: '#065f46' }}>Bệnh nhân: {patientDisplayName}</div>
+                <div style={{ color: '#047857', marginTop: '4px' }}>Mã BN: {currentUser?.patientId || currentUser?.userId || (isDemo ? 'p2010000-0001' : 'BN-' + (currentUser?.id || 'MỚI'))}</div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
                 <span style={{ color: '#64748b' }}>Nhóm máu:</span>
-                <span style={{ fontWeight: 700, color: '#0f172a' }}>O+</span>
+                <span style={{ fontWeight: 700, color: '#0f172a' }}>{currentUser?.bloodGroup || (isDemo ? 'O+' : 'Chưa rõ')}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
                 <span style={{ color: '#64748b' }}>Tiền sử dị ứng:</span>
-                <span style={{ fontWeight: 700, color: '#dc2626' }}>Dị ứng Penicillin</span>
+                <span style={{ fontWeight: 700, color: (currentUser?.allergies && currentUser.allergies !== 'Không có') || isDemo ? '#dc2626' : '#16a34a' }}>
+                  {currentUser?.allergies || (isDemo ? 'Dị ứng Penicillin' : 'Không có')}
+                </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>
                 <span style={{ color: '#64748b' }}>Năm sinh:</span>
-                <span style={{ fontWeight: 600 }}>2002 (Nam)</span>
+                <span style={{ fontWeight: 600 }}>{currentUser?.dob || (isDemo ? '2002' : 'Chưa cập nhật')} {currentUser?.gender ? `(${currentUser.gender})` : (isDemo ? '(Nam)' : '')}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: '#64748b' }}>Địa chỉ:</span>
-                <span style={{ fontWeight: 600 }}>Hà Nội</span>
+                <span style={{ fontWeight: 600 }}>{currentUser?.address || (isDemo ? 'Hà Nội' : 'Chưa cập nhật')}</span>
               </div>
 
               <button 

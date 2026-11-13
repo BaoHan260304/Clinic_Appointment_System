@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { matchesPatient } from '../api/client';
 import { 
   CalendarCheck, 
   PlusCircle, 
@@ -29,13 +30,7 @@ export default function AppointmentsView({
   // Strictly filter appointments by role: Patient only sees own appointments, Doctor sees own doctor appointments
   const scopedAppointments = appointments.filter(a => {
     if (role === 'PATIENT') {
-      const pName = (!currentUser?.name || currentUser.name.includes('@') || currentUser.name === 'quan.patient' || currentUser.name === 'Đỗ Minh Quân')
-        ? 'Nguyễn Mạnh Quân'
-        : currentUser.name;
-
-      return a.patientName === pName || 
-             a.patientName === 'Nguyễn Mạnh Quân' || 
-             (currentUser?.patientId && a.patientId === currentUser.patientId);
+      return matchesPatient(a, currentUser);
     }
     if (role === 'DOCTOR') {
       return a.doctorName?.includes('Nguyễn Văn An') || a.doctorId === currentUser?.doctorId;
@@ -164,7 +159,7 @@ export default function AppointmentsView({
                     </td>
                     <td>
                       <div style={{ fontWeight: 700, color: '#0f172a' }}>{item.patientName}</div>
-                      {item.patientName === 'Nguyễn Mạnh Quân' && (
+                      {matchesPatient(item, currentUser) && (
                         <span style={{ fontSize: '10px', color: '#059669', fontWeight: 600 }}>Tài khoản của bạn</span>
                       )}
                     </td>

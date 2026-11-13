@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { isDemoPatient } from '../api/client';
 import { 
   Users, FileText, Phone, Mail, MapPin, AlertCircle, Heart, Shield, Lock, Eye, 
   AlertTriangle, CheckCircle2, Activity, Pill, Search, X, ShieldAlert, ArrowRight, UserCheck
@@ -12,22 +13,40 @@ export default function PatientsView({ patients = [], currentUser }) {
 
   const isPatientPersonal = role === 'PATIENT';
 
-  // Normalize current patient data (Default demo patient: Nguyễn Mạnh Quân)
-  const pName = (!currentUser?.name || currentUser.name.includes('@') || currentUser.name === 'quan.patient' || currentUser.name === 'Đỗ Minh Quân')
-    ? 'Nguyễn Mạnh Quân'
-    : currentUser.name;
+  // Normalize current patient data (Strictly scoped by patient identity)
+  const isDemo = isDemoPatient(currentUser);
 
-  const myRecord = patients.find(p => p.fullName === pName || p.fullName === 'Nguyễn Mạnh Quân') || {
-    id: "p2010000-0000-0000-0000-000000000001",
-    fullName: "Nguyễn Mạnh Quân",
-    dob: "2002-05-15",
-    gender: "Nam",
-    phone: "0971 234 567",
-    email: "quan.patient@example.com",
-    address: "Hà Nội",
-    bloodGroup: "O+",
-    allergies: "Dị ứng Penicillin"
-  };
+  let myRecord = null;
+  if (isDemo) {
+    myRecord = patients.find(p => p.fullName === 'Nguyễn Mạnh Quân' || p.id === 'p2010000-0000-0000-0000-000000000001') || {
+      id: "p2010000-0000-0000-0000-000000000001",
+      fullName: "Nguyễn Mạnh Quân",
+      dob: "2002-05-15",
+      gender: "Nam",
+      phone: "0971 234 567",
+      email: "quan.patient@example.com",
+      address: "Hà Nội",
+      bloodGroup: "O+",
+      allergies: "Dị ứng Penicillin"
+    };
+  } else {
+    myRecord = patients.find(p => 
+      (currentUser?.patientId && p.id === currentUser.patientId) ||
+      (currentUser?.userId && p.id === currentUser.userId) ||
+      (p.email && currentUser?.email && p.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+      (p.fullName && currentUser?.name && p.fullName.trim().toLowerCase() === currentUser.name.trim().toLowerCase())
+    ) || {
+      id: currentUser?.patientId || currentUser?.userId || `p-${Date.now()}`,
+      fullName: currentUser?.name || currentUser?.fullName || 'Bệnh nhân mới',
+      dob: currentUser?.dob || '2000-01-01',
+      gender: currentUser?.gender || 'Nam',
+      phone: currentUser?.phone || 'Chưa cập nhật',
+      email: currentUser?.email || '',
+      address: currentUser?.address || 'Hà Nội',
+      bloodGroup: currentUser?.bloodGroup || 'Chưa rõ',
+      allergies: currentUser?.allergies || 'Không có'
+    };
+  }
 
   // Mock EHR history for modal
   const medicalHistories = {
@@ -206,21 +225,38 @@ export default function PatientsView({ patients = [], currentUser }) {
                   </div>
                 </div>
 
-                {/* Dị ứng Penicillin nổi bật với cảnh báo y tế */}
-                <div style={{ gridColumn: 'span 2', padding: '14px', background: '#fef2f2', borderRadius: '8px', border: '1px solid #fecaca' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <AlertTriangle size={15} color="#dc2626" />
-                    <span style={{ fontSize: '12px', color: '#dc2626', fontWeight: 800, textTransform: 'uppercase' }}>
-                      Cảnh báo tiền sử dị ứng thuốc nghiêm trọng
-                    </span>
+                {/* Tiền sử dị ứng & Cảnh báo an toàn (Động theo từng bệnh nhân) */}
+                {myRecord?.allergies && myRecord.allergies !== 'Không có' && myRecord.allergies !== 'None' ? (
+                  <div style={{ gridColumn: 'span 2', padding: '14px', background: '#fef2f2', borderRadius: '8px', border: '1px solid #fecaca' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <AlertTriangle size={15} color="#dc2626" />
+                      <span style={{ fontSize: '12px', color: '#dc2626', fontWeight: 800, textTransform: 'uppercase' }}>
+                        Cảnh báo tiền sử dị ứng thuốc nghiêm trọng
+                      </span>
+                    </div>
+                    <div style={{ fontWeight: 800, color: '#b91c1c', fontSize: '15px' }}>
+                      {myRecord?.allergies}
+                    </div>
+                    <p style={{ fontSize: '11px', color: '#7f1d1d', marginTop: '4px', lineHeight: 1.5 }}>
+                      * Khuyến cáo y khoa: Hệ thống tự động gắn cờ chống chỉ định đối với các nhóm thuốc có tiền sử phản ứng quá mẫn ({myRecord?.allergies}).
+                    </p>
                   </div>
-                  <div style={{ fontWeight: 800, color: '#b91c1c', fontSize: '15px' }}>
-                    {myRecord?.allergies}
+                ) : (
+                  <div style={{ gridColumn: 'span 2', padding: '14px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <CheckCircle2 size={15} color="#16a34a" />
+                      <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: 800, textTransform: 'uppercase' }}>
+                        Tiền sử dị ứng & Cảnh báo an toàn
+                      </span>
+                    </div>
+                    <div style={{ fontWeight: 700, color: '#15803d', fontSize: '14px' }}>
+                      Chưa ghi nhận tiền sử dị ứng thuốc hay thực phẩm
+                    </div>
+                    <p style={{ fontSize: '11px', color: '#166534', marginTop: '4px', lineHeight: 1.5 }}>
+                      * Hồ sơ sức khỏe chưa ghi nhận tiền sử quá mẫn. Bệnh nhân có thể sử dụng các phác đồ điều trị thông thường theo chỉ định của bác sĩ.
+                    </p>
                   </div>
-                  <p style={{ fontSize: '11px', color: '#7f1d1d', marginTop: '4px', lineHeight: 1.5 }}>
-                    * Khuyến cáo y khoa: Bệnh nhân có tiền sử phản ứng quá mẫn với Penicillin. Hệ thống tự động gắn cờ chống chỉ định đối với các kháng sinh họ Beta-lactam.
-                  </p>
-                </div>
+                )}
 
                 <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   <span style={{ fontSize: '11px', color: '#64748b' }}>Số điện thoại liên hệ</span>
@@ -239,14 +275,14 @@ export default function PatientsView({ patients = [], currentUser }) {
               </div>
             </div>
 
-            {/* Bệnh án cá nhân gần nhất của Nguyễn Mạnh Quân */}
+            {/* Bệnh án cá nhân gần nhất */}
             <div className="card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                 <h3 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
                   <FileText size={18} color="#2563eb" />
                   Bệnh Án Cá Nhân & Đơn Thuốc Gần Nhất
                 </h3>
-                <span style={{ fontSize: '11px', color: '#64748b' }}>Ngày khám: 28/10/2026</span>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>Ngày cập nhật: 28/10/2026</span>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px' }}>
@@ -262,19 +298,25 @@ export default function PatientsView({ patients = [], currentUser }) {
 
                 <div>
                   <div style={{ fontSize: '12px', fontWeight: 700, color: '#0f172a', marginBottom: '6px' }}>
-                    Đơn thuốc chỉ định an toàn (Đã loại trừ Penicillin):
+                    {getPatientHistory(myRecord.fullName).prescriptions.length > 0 ? 'Đơn thuốc chỉ định:' : 'Danh mục thuốc điều trị:'}
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    {getPatientHistory(myRecord.fullName).prescriptions.map((rx, idx) => (
-                      <div key={idx} style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <strong style={{ color: '#0f172a' }}>{rx.name}</strong>
-                          <div style={{ fontSize: '11px', color: '#64748b' }}>{rx.dosage} • {rx.freq}</div>
+                  {getPatientHistory(myRecord.fullName).prescriptions.length === 0 ? (
+                    <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '6px', border: '1px dashed #cbd5e1', color: '#64748b', fontSize: '12px' }}>
+                      Chưa phát sinh đơn thuốc nào cho đợt khám này.
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {getPatientHistory(myRecord.fullName).prescriptions.map((rx, idx) => (
+                        <div key={idx} style={{ padding: '8px 12px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div>
+                            <strong style={{ color: '#0f172a' }}>{rx.name}</strong>
+                            <div style={{ fontSize: '11px', color: '#64748b' }}>{rx.dosage} • {rx.freq}</div>
+                          </div>
+                          <span style={{ fontSize: '11px', fontWeight: 600, color: '#2563eb' }}>{rx.duration}</span>
                         </div>
-                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#2563eb' }}>{rx.duration}</span>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -603,7 +645,7 @@ export default function PatientsView({ patients = [], currentUser }) {
                 <div style={{ marginTop: '8px', background: '#ffffff', padding: '10px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '12px', border: '1px solid #fee2e2' }}>
                   <div><strong>HTTP Status:</strong> 403 FORBIDDEN</div>
                   <div><strong>Endpoint:</strong> GET /api/patients</div>
-                  <div><strong>Tài khoản:</strong> Nguyễn Mạnh Quân (Role: PATIENT)</div>
+                  <div><strong>Tài khoản:</strong> {myRecord?.fullName || 'Bệnh nhân'} (Role: PATIENT)</div>
                   <div><strong>Lý do chặn:</strong> Required role: DOCTOR or ADMIN</div>
                 </div>
               </div>

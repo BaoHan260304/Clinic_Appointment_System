@@ -13,7 +13,7 @@ import NewAppointmentModal from './components/NewAppointmentModal';
 import PaymentModal from './components/PaymentModal';
 import AuthModal from './components/AuthModal';
 import LoginView from './views/LoginView';
-import { api } from './api/client';
+import { api, matchesPatient } from './api/client';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function App() {
@@ -201,18 +201,14 @@ export default function App() {
     showToast('Bạn đã đăng xuất khỏi hệ thống.');
   };
 
-  const pName = (!currentUser?.name || currentUser.name.includes('@') || currentUser.name === 'quan.patient' || currentUser.name === 'Đỗ Minh Quân')
-    ? 'Nguyễn Mạnh Quân'
-    : currentUser.name;
-
-  // Pending counts for sidebar badge by role
+  // Pending counts for sidebar badge by role (Scoped cleanly to current patient)
   const myUpcomingAppointments = appointments.filter(a => 
-    (a.patientName === pName || a.patientName === 'Nguyễn Mạnh Quân' || a.patientId === currentUser?.patientId) && 
+    matchesPatient(a, currentUser) && 
     (a.status === 'PENDING' || a.status === 'CONFIRMED')
   ).length;
 
   const myPendingPayments = payments.filter(p => 
-    (p.patientName === pName || p.patientName === 'Nguyễn Mạnh Quân' || p.patientId === currentUser?.patientId) && 
+    matchesPatient(p, currentUser) && 
     p.status === 'PENDING'
   ).length;
 

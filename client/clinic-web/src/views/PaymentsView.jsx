@@ -1,16 +1,13 @@
 import React from 'react';
+import { matchesPatient } from '../api/client';
 import { CreditCard, CheckCircle2, Clock, AlertCircle, QrCode } from 'lucide-react';
 
 export default function PaymentsView({ payments = [], currentUser, onPayPayment }) {
   const role = currentUser?.role || 'PATIENT';
   const isPatient = role === 'PATIENT';
 
-  const pName = (!currentUser?.name || currentUser.name.includes('@') || currentUser.name === 'quan.patient' || currentUser.name === 'Đỗ Minh Quân')
-    ? 'Nguyễn Mạnh Quân'
-    : currentUser.name;
-
   const scopedPayments = isPatient 
-    ? payments.filter(p => p.patientName === pName || p.patientName === 'Nguyễn Mạnh Quân' || p.patientId === currentUser?.patientId)
+    ? payments.filter(p => matchesPatient(p, currentUser))
     : payments;
 
   const totalPaid = scopedPayments

@@ -13,8 +13,39 @@ const STORAGE_KEYS = {
   APPOINTMENTS: 'clinic_appointments_data',
   PAYMENTS: 'clinic_payments_data',
   DOCTORS: 'clinic_doctors_data',
+  PATIENTS: 'clinic_patients_data',
   NOTIFICATIONS: 'clinic_notifications_data'
 };
+
+export function isDemoPatient(user) {
+  if (!user) return false;
+  const email = (user.email || '').toLowerCase();
+  const name = (user.name || user.fullName || '').trim();
+  const id = user.userId || user.patientId || user.id || '';
+  return email === 'quan.patient@example.com' ||
+         name === 'Nguyễn Mạnh Quân' ||
+         name === 'Đỗ Minh Quân' ||
+         name === 'quan.patient' ||
+         id === 'p2010000-0000-0000-0000-000000000001';
+}
+
+export function matchesPatient(record, currentUser) {
+  if (!record || !currentUser) return false;
+  if (isDemoPatient(currentUser)) {
+    return record.patientName === 'Nguyễn Mạnh Quân' ||
+           record.fullName === 'Nguyễn Mạnh Quân' ||
+           record.patientId === 'p2010000-0000-0000-0000-000000000001' ||
+           record.id === 'p2010000-0000-0000-0000-000000000001';
+  }
+  const curName = (currentUser.name || currentUser.fullName || '').trim().toLowerCase();
+  const recName = (record.patientName || record.fullName || '').trim().toLowerCase();
+  const curId = currentUser.patientId || currentUser.userId || currentUser.id;
+  const recId = record.patientId || record.id;
+
+  if (curId && recId && curId === recId) return true;
+  if (curName && recName && curName === recName) return true;
+  return false;
+}
 
 // Khởi tạo localStorage nếu chưa có
 function getStoredData(key, fallback) {
@@ -388,7 +419,7 @@ export const api = {
     }
     const list = getStoredData(STORAGE_KEYS.APPOINTMENTS, initialAppointments);
     const cleaned = list.map(a => {
-      if (a.patientName === 'quan.patient' || a.patientName === 'Đỗ Minh Quân' || a.patientName?.includes('@')) {
+      if (a.patientName === 'quan.patient' || a.patientName === 'Đỗ Minh Quân') {
         return { ...a, patientName: 'Nguyễn Mạnh Quân' };
       }
       return a;
@@ -405,10 +436,13 @@ export const api = {
     const specialty = data.specialty || data.specialization || targetDoctor?.specialty || targetDoctor?.specialization || 'Nội Tổng Quát';
     const price = typeof data.price === 'number' ? data.price : (targetDoctor?.price || 300000);
 
+    const currentUser = this.getCurrentUser();
     let cleanPatientName = data.patientName;
-    if (!cleanPatientName || cleanPatientName.includes('@') || cleanPatientName === 'quan.patient' || cleanPatientName === 'Đỗ Minh Quân') {
-      cleanPatientName = 'Nguyễn Mạnh Quân';
+    if (!cleanPatientName) {
+      cleanPatientName = isDemoPatient(currentUser) ? 'Nguyễn Mạnh Quân' : (currentUser?.name || 'Bệnh nhân');
     }
+
+    const patientId = data.patientId || currentUser?.patientId || currentUser?.userId || (isDemoPatient(currentUser) ? 'p2010000-0000-0000-0000-000000000001' : `p-${Date.now()}`);
 
     const dateStr = data.appointmentDate || '2026-11-15';
     let startHourMin = '09:00';
@@ -418,8 +452,35 @@ export const api = {
       if (parts[0]) startHourMin = parts[0];
       if (parts[1]) endHourMin = parts[1];
     }
+    const timeSlotStr = `${startHourMin} - ${endHourMin}`;
     const startTimeIso = `${dateStr}T${startHourMin}:00`;
     const endTimeIso = `${dateStr}T${endHourMin}:00`;
+
+    // Anti-duplicate validation (Chống đặt trùng ca khám - Áp dụng cả Gateway & Mock)
+    const currentAppointments = await this.getAppointments();
+    const activeAppointments = currentAppointments.filter(a => a.status === 'PENDING' || a.status === 'CONFIRMED');
+
+    // 1. Kiểm tra bệnh nhân đã có lịch trong khung giờ này chưa
+    const existingPatientAppt = activeAppointments.find(a =>
+      a.appointmentDate === dateStr &&
+      a.appointmentTime === timeSlotStr &&
+      ((a.patientId && patientId && a.patientId === patientId) ||
+       (a.patientName && cleanPatientName && a.patientName.trim().toLowerCase() === cleanPatientName.trim().toLowerCase()))
+    );
+    if (existingPatientAppt) {
+      throw new Error(`Bạn đã có một lịch khám vào khung giờ ${timeSlotStr} ngày ${dateStr}. Không thể đặt trùng ca khám.`);
+    }
+
+    // 2. Kiểm tra bác sĩ đã được bệnh nhân khác đặt khung giờ này chưa
+    const existingDoctorAppt = activeAppointments.find(a =>
+      a.appointmentDate === dateStr &&
+      a.appointmentTime === timeSlotStr &&
+      ((a.doctorId && doctorId && a.doctorId === doctorId) ||
+       (a.doctorName && doctorName && a.doctorName.trim().toLowerCase() === doctorName.trim().toLowerCase()))
+    );
+    if (existingDoctorAppt) {
+      throw new Error(`Bác sĩ ${doctorName} đã có ca khám vào khung giờ ${timeSlotStr} ngày ${dateStr}. Vui lòng chọn khung giờ khác.`);
+    }
 
     if (this.getMode() === 'gateway') {
       try {
@@ -438,13 +499,13 @@ export const api = {
         if (res && res.id) {
           const newAppt = {
             id: res.id,
-            patientId: res.patientId || data.patientId || 'p2010000-0000-0000-0000-000000000001',
+            patientId: res.patientId || patientId,
             patientName: cleanPatientName,
             doctorId: res.doctorId || doctorId,
             doctorName: res.doctorName || doctorName,
             specialty: res.specialization || specialty,
             appointmentDate: dateStr,
-            appointmentTime: `${startHourMin} - ${endHourMin}`,
+            appointmentTime: timeSlotStr,
             status: res.status || 'PENDING',
             paymentStatus: 'AWAITING_PAYMENT',
             reason: res.reason || data.reason || 'Khám tổng quát',
@@ -455,35 +516,38 @@ export const api = {
           return newAppt;
         }
       } catch (e) {
+        if (e.message && (e.message.includes('trùng') || e.message.includes('lịch') || e.message.includes('khung giờ'))) {
+          throw e;
+        }
         console.warn('Gateway booking failed or offline, fallback to mock booking:', e.message);
       }
     }
 
     // Mock Booking Fallback
-    const list = await this.getAppointments();
     const newAppointment = {
       id: `a301-mock-${Date.now()}`,
-      patientId: data.patientId || 'p2010000-0000-0000-0000-000000000001',
+      patientId: patientId,
       patientName: cleanPatientName,
       doctorId: doctorId,
       doctorName: doctorName,
       specialty: specialty,
       appointmentDate: dateStr,
-      appointmentTime: `${startHourMin} - ${endHourMin}`,
+      appointmentTime: timeSlotStr,
       status: 'PENDING',
       paymentStatus: 'AWAITING_PAYMENT',
       reason: data.reason || 'Khám tổng quát',
       createdAt: new Date().toLocaleString('vi-VN')
     };
 
-    const updated = [newAppointment, ...list];
+    const updated = [newAppointment, ...currentAppointments];
     setStoredData(STORAGE_KEYS.APPOINTMENTS, updated);
 
-    // Cũng tạo 1 bản ghi payment pending
+    // Cũng tạo 1 bản ghi payment pending với đúng patientId và patientName
     const payments = await this.getPayments();
     const newPayment = {
       id: `pay-${Date.now()}`,
       appointmentId: newAppointment.id,
+      patientId: patientId,
       patientName: newAppointment.patientName,
       amount: price,
       currency: 'VND',
@@ -577,8 +641,13 @@ export const api = {
   async getPatients() {
     if (this.getMode() === 'gateway') {
       try {
-        return await this.request('/api/patients');
+        const res = await this.request('/api/patients');
+        if (Array.isArray(res) && res.length > 0) return res;
       } catch (e) {}
+    }
+    const stored = getStoredData(STORAGE_KEYS.PATIENTS, null);
+    if (Array.isArray(stored) && stored.length > 0) {
+      return stored;
     }
     return initialPatients;
   },
@@ -592,7 +661,7 @@ export const api = {
     }
     const list = getStoredData(STORAGE_KEYS.PAYMENTS, initialPayments);
     const cleaned = list.map(p => {
-      if (p.patientName === 'quan.patient' || p.patientName === 'Đỗ Minh Quân' || p.patientName?.includes('@')) {
+      if (p.patientName === 'quan.patient' || p.patientName === 'Đỗ Minh Quân') {
         return { ...p, patientName: 'Nguyễn Mạnh Quân' };
       }
       return p;

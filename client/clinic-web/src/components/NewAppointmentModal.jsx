@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { isDemoPatient } from '../api/client';
 import { Calendar, Clock, User, FileText, CheckCircle2 } from 'lucide-react';
 
 export default function NewAppointmentModal({ 
@@ -19,15 +20,17 @@ export default function NewAppointmentModal({
   const docSpecialty = selectedDoctor.specialty || selectedDoctor.specialization || 'Nội Tổng Quát';
   const docPrice = typeof selectedDoctor.price === 'number' ? selectedDoctor.price : 300000;
 
-  const patientDisplayName = (!currentUser?.name || currentUser.name.includes('@') || currentUser.name === 'quan.patient' || currentUser.name === 'Đỗ Minh Quân')
-    ? 'Nguyễn Mạnh Quân'
-    : currentUser.name;
+  const isDemo = isDemoPatient(currentUser);
+  const patientDisplayName = isDemo 
+    ? 'Nguyễn Mạnh Quân' 
+    : (currentUser?.name || currentUser?.fullName || 'Bệnh nhân mới');
+  const patientId = currentUser?.patientId || currentUser?.userId || (isDemo ? 'p2010000-0000-0000-0000-000000000001' : null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     await onSubmit({
-      patientId: currentUser?.userId || 'p2010000-0000-0000-0000-000000000001',
+      patientId: patientId,
       patientName: patientDisplayName,
       doctorId: selectedDoctor.id || 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
       doctorName: docName,
