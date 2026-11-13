@@ -32,6 +32,48 @@ function setStoredData(key, val) {
   } catch (e) {}
 }
 
+export function normalizeDoctor(d) {
+  if (!d) return null;
+  const name = d.fullName || d.name || 'BS. CKI Nguyễn Văn An';
+  const specialty = d.specialty || d.specialization || 'Nội Tổng Quát';
+  const price = typeof d.price === 'number' ? d.price : (
+    specialty.toLowerCase().includes('tim') ? 450000 :
+    specialty.toLowerCase().includes('nhi') ? 350000 :
+    specialty.toLowerCase().includes('da') ? 350000 : 300000
+  );
+  const phone = d.phone || d.phoneNumber || '0912 345 678';
+  const email = d.email || 'bs.an@clinic.local';
+  const rating = typeof d.rating === 'number' ? d.rating : 4.9;
+  const experienceYears = typeof d.experienceYears === 'number' ? d.experienceYears : 10;
+  const room = d.room || (
+    specialty.toLowerCase().includes('tim') ? 'Phòng 305 - Tầng 3' :
+    specialty.toLowerCase().includes('nhi') ? 'Phòng 102 - Tầng 1' :
+    specialty.toLowerCase().includes('da') ? 'Phòng 402 - Tầng 4' : 'Phòng 201 - Tầng 2'
+  );
+  const availableDays = Array.isArray(d.availableDays) && d.availableDays.length > 0
+    ? d.availableDays
+    : ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'];
+
+  return {
+    ...d,
+    id: d.id,
+    userId: d.userId || d.id,
+    name,
+    fullName: name,
+    specialty,
+    specialization: specialty,
+    price,
+    phone,
+    phoneNumber: phone,
+    email,
+    rating,
+    experienceYears,
+    room,
+    availableDays,
+    slots: d.slots || []
+  };
+}
+
 export const api = {
   getMode() {
     return localStorage.getItem(STORAGE_KEYS.MODE) || 'mock';
@@ -134,8 +176,8 @@ export const api = {
     if (email.includes('doctor') || email.includes('bs.')) {
       role = 'DOCTOR';
       name = 'BS. CKI Nguyễn Văn An';
-      userId = 'd1010000-0000-0000-0000-000000000001';
-      doctorId = 'd1010000-0000-0000-0000-000000000001';
+      userId = 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+      doctorId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
       patientId = null;
     } else if (email.includes('admin')) {
       role = 'ADMIN';
@@ -326,32 +368,78 @@ export const api = {
   },
 
   async createAppointment(data) {
-    if (this.getMode() === 'gateway') {
-      try {
-        return await this.request('/api/appointments', {
-          method: 'POST',
-          body: JSON.stringify(data)
-        });
-      } catch (e) {
-        console.warn('Gateway offline, fallback to mock:', e.message);
-      }
-    }
+    const doctors = await this.getDoctors();
+    const targetDoctor = doctors.find(d => d.id === data.doctorId) || doctors[0];
+    const doctorName = data.doctorName || targetDoctor?.fullName || targetDoctor?.name || 'BS. CKI Nguyễn Văn An';
+    const doctorId = data.doctorId || targetDoctor?.id || 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+    const specialty = data.specialty || data.specialization || targetDoctor?.specialty || targetDoctor?.specialization || 'Nội Tổng Quát';
+    const price = typeof data.price === 'number' ? data.price : (targetDoctor?.price || 300000);
 
     let cleanPatientName = data.patientName;
     if (!cleanPatientName || cleanPatientName.includes('@') || cleanPatientName === 'quan.patient' || cleanPatientName === 'Đỗ Minh Quân') {
       cleanPatientName = 'Nguyễn Mạnh Quân';
     }
 
+    const dateStr = data.appointmentDate || '2026-11-15';
+    let startHourMin = '09:00';
+    let endHourMin = '09:30';
+    if (data.appointmentTime && data.appointmentTime.includes('-')) {
+      const parts = data.appointmentTime.split('-').map(s => s.trim().split(' ')[0]);
+      if (parts[0]) startHourMin = parts[0];
+      if (parts[1]) endHourMin = parts[1];
+    }
+    const startTimeIso = `${dateStr}T${startHourMin}:00`;
+    const endTimeIso = `${dateStr}T${endHourMin}:00`;
+
+    if (this.getMode() === 'gateway') {
+      try {
+        const payload = {
+          specialization: specialty,
+          startTime: startTimeIso,
+          endTime: endTimeIso,
+          rescheduledFromAppointmentId: null,
+          reason: data.reason || 'Khám sức khỏe tổng quát',
+          bookingSource: 'WEB_PORTAL'
+        };
+        const res = await this.request('/api/appointments', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        if (res && res.id) {
+          const newAppt = {
+            id: res.id,
+            patientId: res.patientId || data.patientId || 'p2010000-0000-0000-0000-000000000001',
+            patientName: cleanPatientName,
+            doctorId: res.doctorId || doctorId,
+            doctorName: res.doctorName || doctorName,
+            specialty: res.specialization || specialty,
+            appointmentDate: dateStr,
+            appointmentTime: `${startHourMin} - ${endHourMin}`,
+            status: res.status || 'PENDING',
+            paymentStatus: 'AWAITING_PAYMENT',
+            reason: res.reason || data.reason || 'Khám tổng quát',
+            createdAt: new Date().toLocaleString('vi-VN')
+          };
+          const list = getStoredData(STORAGE_KEYS.APPOINTMENTS, initialAppointments);
+          setStoredData(STORAGE_KEYS.APPOINTMENTS, [newAppt, ...list]);
+          return newAppt;
+        }
+      } catch (e) {
+        console.warn('Gateway booking failed or offline, fallback to mock booking:', e.message);
+      }
+    }
+
+    // Mock Booking Fallback
     const list = await this.getAppointments();
     const newAppointment = {
       id: `a301-mock-${Date.now()}`,
       patientId: data.patientId || 'p2010000-0000-0000-0000-000000000001',
       patientName: cleanPatientName,
-      doctorId: data.doctorId,
-      doctorName: data.doctorName || 'Bác sĩ chuyên khoa',
-      specialty: data.specialty || 'Đa Khoa',
-      appointmentDate: data.appointmentDate,
-      appointmentTime: data.appointmentTime || '09:00 - 09:30',
+      doctorId: doctorId,
+      doctorName: doctorName,
+      specialty: specialty,
+      appointmentDate: dateStr,
+      appointmentTime: `${startHourMin} - ${endHourMin}`,
       status: 'PENDING',
       paymentStatus: 'AWAITING_PAYMENT',
       reason: data.reason || 'Khám tổng quát',
@@ -367,7 +455,7 @@ export const api = {
       id: `pay-${Date.now()}`,
       appointmentId: newAppointment.id,
       patientName: newAppointment.patientName,
-      amount: data.price || 300000,
+      amount: price,
       currency: 'VND',
       method: 'VNPAY_QR',
       status: 'PENDING',
@@ -441,10 +529,18 @@ export const api = {
   async getDoctors() {
     if (this.getMode() === 'gateway') {
       try {
-        return await this.request('/api/doctors');
-      } catch (e) {}
+        const res = await this.request('/api/doctors');
+        if (Array.isArray(res) && res.length > 0) {
+          const normalized = res.map(d => normalizeDoctor(d));
+          setStoredData(STORAGE_KEYS.DOCTORS, normalized);
+          return normalized;
+        }
+      } catch (e) {
+        console.warn('Gateway /api/doctors error, fallback to stored:', e.message);
+      }
     }
-    return getStoredData(STORAGE_KEYS.DOCTORS, initialDoctors);
+    const raw = getStoredData(STORAGE_KEYS.DOCTORS, initialDoctors);
+    return Array.isArray(raw) ? raw.map(d => normalizeDoctor(d)) : initialDoctors.map(d => normalizeDoctor(d));
   },
 
   // Patients

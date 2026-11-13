@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 public class DoctorRepositoryImpl implements DoctorRepository {
 
     private final SpringDataDoctorRepository jpaRepository;
+    private final SpringDataSlotRepository slotRepository;
     private final DoctorPersistenceMapper mapper;
 
     @Override
@@ -85,27 +86,62 @@ public class DoctorRepositoryImpl implements DoctorRepository {
                 PageRequest.of(0, 1)
         );
 
-        if (slots.isEmpty()) {
-            return Optional.empty();
+        if (!slots.isEmpty()) {
+            SlotJpaEntity slot = slots.get(0);
+            slot.setStatus(SlotStatus.BOOKED);
+            DoctorJpaEntity doctor = slot.getDoctor();
+
+            return Optional.of(new AssignedSlot(
+                    slot.getId(),
+                    doctor.getId(),
+                    doctor.getUserId(),
+                    doctor.getName(),
+                    doctor.getSpecialization(),
+                    doctor.getPhoneNumber(),
+                    doctor.getEmail(),
+                    slot.getStartTime(),
+                    slot.getEndTime(),
+                    true,
+                    slot.getStatus().name()
+            ));
         }
 
-        SlotJpaEntity slot = slots.get(0);
-        slot.setStatus(SlotStatus.BOOKED);
-        DoctorJpaEntity doctor = slot.getDoctor();
+        // Fallback: Tìm bác sĩ còn trống lịch trong chuyên khoa để tự động gán slot
+        List<DoctorJpaEntity> doctors = jpaRepository.findBySpecializationContainingIgnoreCase(specialization);
+        if (doctors.isEmpty()) {
+            doctors = jpaRepository.findAll().stream().filter(DoctorJpaEntity::isActive).toList();
+        }
 
-        return Optional.of(new AssignedSlot(
-                slot.getId(),
-                doctor.getId(),
-                doctor.getUserId(),
-                doctor.getName(),
-                doctor.getSpecialization(),
-                doctor.getPhoneNumber(),
-                doctor.getEmail(),
-                slot.getStartTime(),
-                slot.getEndTime(),
-                true,
-                slot.getStatus().name()
-        ));
+        for (DoctorJpaEntity doc : doctors) {
+            if (!doc.isActive()) continue;
+            boolean busy = slotRepository.existsBookedSlotInRange(doc.getId(), startTime, endTime);
+            if (!busy) {
+                SlotJpaEntity newSlot = SlotJpaEntity.builder()
+                        .id(UUID.randomUUID())
+                        .doctor(doc)
+                        .startTime(startTime)
+                        .endTime(endTime)
+                        .status(SlotStatus.BOOKED)
+                        .build();
+                slotRepository.save(newSlot);
+
+                return Optional.of(new AssignedSlot(
+                        newSlot.getId(),
+                        doc.getId(),
+                        doc.getUserId(),
+                        doc.getName(),
+                        doc.getSpecialization(),
+                        doc.getPhoneNumber(),
+                        doc.getEmail(),
+                        newSlot.getStartTime(),
+                        newSlot.getEndTime(),
+                        true,
+                        newSlot.getStatus().name()
+                ));
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override

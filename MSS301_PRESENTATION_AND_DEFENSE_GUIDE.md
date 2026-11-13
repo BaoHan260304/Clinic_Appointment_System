@@ -1,8 +1,7 @@
 # BỘ TÀI LIỆU TOÀN DIỆN THUYẾT TRÌNH & BẢO VỆ ĐỒ ÁN MSS301
 ## ĐỀ TÀI: HỆ THỐNG ĐẶT LỊCH KHÁM BỆNH TRỰC TUYẾN MEDISYNC CLINIC
 ### HỌC KỲ: FALL 2026 | LỚP: MSS301 | NHÓM: GROUP 05
-**Trưởng nhóm (Leader):** Nguyễn Mạnh Quân  
-**Thành viên:** Nam, Long, Mười, Vũ  
+**Thành viên:** Nam, Long, Mười, Vũ, Quân  
 **Thời lượng bảo vệ:** 25 phút thuyết trình & Demo + 10 phút Q&A hỏi đáp với Giảng viên
 
 ---

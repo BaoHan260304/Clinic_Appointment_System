@@ -34,7 +34,17 @@ export default function DoctorsView({ doctors = [], currentUser, onBookWithDocto
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
         {doctors.map(doctor => {
-          const isMyProfile = isDoctorRole && doctor.fullName.includes('Nguyễn Văn An');
+          const docName = doctor.fullName || doctor.name || 'Bác sĩ chuyên khoa';
+          const docSpecialty = doctor.specialty || doctor.specialization || 'Đa Khoa';
+          const docPrice = typeof doctor.price === 'number' ? doctor.price : 300000;
+          const docRating = typeof doctor.rating === 'number' ? doctor.rating : 4.9;
+          const docExp = typeof doctor.experienceYears === 'number' ? doctor.experienceYears : 10;
+          const docRoom = doctor.room || 'Phòng khám đa khoa - Tầng 2';
+          const docDays = Array.isArray(doctor.availableDays) && doctor.availableDays.length > 0
+            ? doctor.availableDays.join(', ')
+            : 'Thứ 2, Thứ 3, Thứ 4, Thứ 5, Thứ 6';
+          const isMyProfile = isDoctorRole && docName.includes('Nguyễn Văn An');
+          const initialChar = docName.split(' ').pop().charAt(0) || 'B';
 
           return (
             <div 
@@ -85,11 +95,11 @@ export default function DoctorsView({ doctors = [], currentUser, onBookWithDocto
                     fontSize: '20px',
                     fontWeight: 800
                   }}>
-                    {doctor.fullName.split(' ').pop().charAt(0)}
+                    {initialChar}
                   </div>
 
                   <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>{doctor.fullName}</h3>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>{docName}</h3>
                     <div style={{ 
                       display: 'inline-block', 
                       fontSize: '12px', 
@@ -100,7 +110,7 @@ export default function DoctorsView({ doctors = [], currentUser, onBookWithDocto
                       borderRadius: '4px', 
                       marginTop: '2px' 
                     }}>
-                      {doctor.specialty}
+                      {docSpecialty}
                     </div>
                   </div>
                 </div>
@@ -109,18 +119,18 @@ export default function DoctorsView({ doctors = [], currentUser, onBookWithDocto
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Star size={15} color="#f59e0b" fill="#f59e0b" />
-                    <span style={{ fontWeight: 600, color: '#0f172a' }}>{doctor.rating}</span>
-                    <span>({doctor.experienceYears} năm kinh nghiệm)</span>
+                    <span style={{ fontWeight: 600, color: '#0f172a' }}>{docRating}</span>
+                    <span>({docExp} năm kinh nghiệm)</span>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <MapPin size={15} color="#0d9488" />
-                    <span>{doctor.room}</span>
+                    <span>{docRoom}</span>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Calendar size={15} color="#0d9488" />
-                    <span>Lịch trực: {doctor.availableDays.join(', ')}</span>
+                    <span>Lịch trực: {docDays}</span>
                   </div>
                 </div>
               </div>
@@ -130,7 +140,7 @@ export default function DoctorsView({ doctors = [], currentUser, onBookWithDocto
                 <div>
                   <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>Phí khám</span>
                   <span style={{ fontSize: '16px', fontWeight: 800, color: '#0f766e' }}>
-                    {new Intl.NumberFormat('vi-VN').format(doctor.price)} đ
+                    {new Intl.NumberFormat('vi-VN').format(docPrice)} đ
                   </span>
                 </div>
 

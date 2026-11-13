@@ -70,11 +70,11 @@ export default function App() {
         title: 'Bệnh nhân'
       },
       DOCTOR: {
-        userId: 'd1010000-0000-0000-0000-000000000001',
-        doctorId: 'd1010000-0000-0000-0000-000000000001',
+        userId: 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        doctorId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
         name: 'BS. CKI Nguyễn Văn An',
         role: 'DOCTOR',
-        email: 'bs.an@clinic.local',
+        email: 'dr.nva@clinic.com',
         title: 'Bác sĩ - Nội Tổng Quát'
       },
       ADMIN: {

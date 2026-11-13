@@ -14,7 +14,10 @@ export default function NewAppointmentModal({
   const [reason, setReason] = useState('Khám sức khỏe tổng quát');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const selectedDoctor = doctors.find(d => d.id === selectedDoctorId) || doctors[0];
+  const selectedDoctor = doctors.find(d => d.id === selectedDoctorId) || doctors[0] || {};
+  const docName = selectedDoctor.fullName || selectedDoctor.name || 'BS. CKI Nguyễn Văn An';
+  const docSpecialty = selectedDoctor.specialty || selectedDoctor.specialization || 'Nội Tổng Quát';
+  const docPrice = typeof selectedDoctor.price === 'number' ? selectedDoctor.price : 300000;
 
   const patientDisplayName = (!currentUser?.name || currentUser.name.includes('@') || currentUser.name === 'quan.patient' || currentUser.name === 'Đỗ Minh Quân')
     ? 'Nguyễn Mạnh Quân'
@@ -26,12 +29,13 @@ export default function NewAppointmentModal({
     await onSubmit({
       patientId: currentUser?.userId || 'p2010000-0000-0000-0000-000000000001',
       patientName: patientDisplayName,
-      doctorId: selectedDoctor.id,
-      doctorName: selectedDoctor.fullName,
-      specialty: selectedDoctor.specialty,
+      doctorId: selectedDoctor.id || 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+      doctorName: docName,
+      specialty: docSpecialty,
+      specialization: docSpecialty,
       appointmentDate: date,
       appointmentTime: time,
-      price: selectedDoctor.price,
+      price: docPrice,
       reason
     });
     setIsSubmitting(false);
@@ -71,11 +75,16 @@ export default function NewAppointmentModal({
               onChange={e => setSelectedDoctorId(e.target.value)}
               required
             >
-              {doctors.map(d => (
-                <option key={d.id} value={d.id}>
-                  {d.fullName} - {d.specialty} ({new Intl.NumberFormat('vi-VN').format(d.price)} đ)
-                </option>
-              ))}
+              {doctors.map(d => {
+                const name = d.fullName || d.name || 'Bác sĩ';
+                const spec = d.specialty || d.specialization || 'Đa Khoa';
+                const cost = typeof d.price === 'number' ? d.price : 300000;
+                return (
+                  <option key={d.id} value={d.id}>
+                    {name} - {spec} ({new Intl.NumberFormat('vi-VN').format(cost)} đ)
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -125,7 +134,7 @@ export default function NewAppointmentModal({
           <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #ccfbf1', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: '13px', color: '#0f766e', fontWeight: 600 }}>Tạm tính viện phí:</span>
             <span style={{ fontSize: '16px', fontWeight: 800, color: '#0f766e' }}>
-              {new Intl.NumberFormat('vi-VN').format(selectedDoctor?.price || 300000)} VNĐ
+              {new Intl.NumberFormat('vi-VN').format(docPrice)} VNĐ
             </span>
           </div>
 
